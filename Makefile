@@ -18,7 +18,7 @@ make_roothelper:
 	@$(MAKE) -C ./RootHelper DEBUG=0 $(if $(filter all clean update,$(MAKECMDGOALS)),$(MAKECMDGOALS),all)
 
 make_luisestore:
-	@$(MAKE) -C ./LuiseStore FINALPACKAGE=1 $(MAKECMDGOALS)
+	@$(MAKE) -C ./LuiseStore FINALPACKAGE=1 $(if $(filter all clean update,$(MAKECMDGOALS)),$(MAKECMDGOALS),all)
 
 ifneq ($(MAKECMDGOALS),clean)
 
