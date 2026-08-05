@@ -81,7 +81,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/theos
-          key: ${{ runner.os }}-roothide-theos-${{ hashFiles('.github/workflows/build-release.yml') }}-master
+          key: ${{ runner.os }}-roothide-theos-${{ hashFiles('.github/workflows/build-release.yml') }}-master-owngoal
           restore-keys: |
             ${{ runner.os }}-roothide-theos-
 
@@ -89,7 +89,7 @@ jobs:
         if: steps.cache-theos.outputs.cache-hit != 'true'
         uses: actions/checkout@v4
         with:
-          repository: roothide/theos
+          repository: OwnGoalStudio/theos-roothide
           ref: master
           path: theos
           submodules: recursive
