@@ -15,6 +15,9 @@ env:
   THEOS_PACKAGE_SCHEME: rootless
   FINALPACKAGE: 1
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build LuiseStore
