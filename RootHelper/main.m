@@ -1118,7 +1118,6 @@ int installApp(NSString* appPackagePath, BOOL sign, BOOL force, BOOL isLSUpdate,
 				NSLog(@"[installApp] Failed to copy app bundle for app %@, error: %@", appId, copyError);
 				return 178;
 			}
-		}
 #endif
 	}
 
@@ -1181,9 +1180,7 @@ int installApp(NSString* appPackagePath, BOOL sign, BOOL force, BOOL isLSUpdate,
 			return 181;
 		}
 	}
-#ifndef THEOS_PACKAGE_SCHEME_ROOTHIDE
 	}
-#endif
 #endif
 
 	// Handle developer mode after installing and registering the app, to ensure that we
