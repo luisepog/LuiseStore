@@ -521,7 +521,7 @@ int signAdhoc(NSString *filePath, NSDictionary *entitlements)
 			if (entitlementsXML) {
 				entitlementsPath = [[NSTemporaryDirectory() stringByAppendingPathComponent:[NSUUID UUID].UUIDString] stringByAppendingPathExtension:@"plist"];
 				[entitlementsXML writeToFile:entitlementsPath atomically:NO];
-				signArg = [@"-S" stringByAppendingString:rootfs(entitlementsPath)];
+				signArg = [@"-S" stringByAppendingString:entitlementsPath];
 			}
 			
 		}
