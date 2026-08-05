@@ -515,6 +515,9 @@ int signAdhoc(NSString *filePath, NSDictionary *entitlements)
 			NSString *entitlementsPath = nil;
 			NSString *signArg = @"-s";
 			NSString* errorOutput;
+			NSLog(@"[signAdhoc] filePath=%@", filePath);
+			NSLog(@"[signAdhoc] filePath jbroot=%@", jbroot(filePath));
+			NSLog(@"[signAdhoc] filePath exists=%d jbroot exists=%d", [[NSFileManager defaultManager] fileExistsAtPath:filePath], [[NSFileManager defaultManager] fileExistsAtPath:jbroot(filePath)]);
 			if(entitlements)
 			{
 				NSData *entitlementsXML = [NSPropertyListSerialization dataWithPropertyList:entitlements format:NSPropertyListXMLFormat_v1_0 options:0 error:nil];
@@ -522,7 +525,9 @@ int signAdhoc(NSString *filePath, NSDictionary *entitlements)
 					entitlementsPath = [[filePath stringByDeletingLastPathComponent] stringByAppendingPathComponent:[NSUUID UUID].UUIDString];
 					BOOL writeSuc = [entitlementsXML writeToFile:entitlementsPath atomically:NO];
 					NSLog(@"[signAdhoc] write entitlements %@ => %d (exists: %d)", entitlementsPath, writeSuc, [[NSFileManager defaultManager] fileExistsAtPath:entitlementsPath]);
-					signArg = [@"-S" stringByAppendingString:jbroot(entitlementsPath)];
+					NSString* entJbroot = jbroot(entitlementsPath);
+					NSLog(@"[signAdhoc] entitlements jbroot=%@ exists=%d", entJbroot, [[NSFileManager defaultManager] fileExistsAtPath:entJbroot]);
+					signArg = [@"-S" stringByAppendingString:entJbroot];
 				}
 				
 			}
