@@ -113,15 +113,7 @@ jobs:
       - name: Build ${{ matrix.name }}
         timeout-minutes: 45
         run: |
-          if [ "${{ matrix.name }}" = "roothide" ]; then
-            echo "=== DEBUG: raw dry-run (first 60 lines) ==="
-            make -C RootHelper -n LUISESTORE_LITE=1 THEOS_PACKAGE_SCHEME=roothide 2>&1 | head -60
-            echo "=== DEBUG: grep PACKAGE_SCHEME ==="
-            make -C RootHelper -n LUISESTORE_LITE=1 THEOS_PACKAGE_SCHEME=roothide 2>&1 | grep -c "PACKAGE_SCHEME_ROOTHIDE" || true
-            echo "=== DEBUG: make scheme echo ==="
-            make -C RootHelper -n LUISESTORE_LITE=1 THEOS_PACKAGE_SCHEME=roothide 2>&1 | grep -m3 "Compiling\|Linking" | grep -oE 'THEOS_PACKAGE_SCHEME[^ ]*' | sort -u
-          fi
-          make VERBOSE=1 ${{ matrix.make_target }}
+          make ${{ matrix.make_target }}
 
       - name: Verify roothide helper links libroothide
         if: matrix.name == 'roothide'
@@ -135,9 +127,10 @@ jobs:
             echo "ERROR: $BIN not found after build"
             exit 1
           fi
-          if ! strings "$BIN" | grep -q "libroothide.dylib"; then
+          if ! otool -L "$BIN" | grep -q "libroothide.dylib"; then
             echo "ERROR: $BIN is NOT linked against libroothide.dylib"
             echo "rootfs()/jbroot() fall back to no-op stubs -> ldid gets wrong paths -> error 175"
+            otool -L "$BIN" 2>/dev/null || true
             exit 1
           fi
           echo "OK: helper linked with libroothide.dylib"
