@@ -109,7 +109,12 @@ bool registerPath(NSString *path, BOOL unregister, BOOL forceSystem) {
 		NSString *containerPath = [appDataContainer url].path;
 
 		BOOL isRemovableSystemApp = [[NSFileManager defaultManager] fileExistsAtPath:[@"/System/Library/AppSignatures" stringByAppendingPathComponent:appBundleID]];
+#ifdef THEOS_PACKAGE_SCHEME_ROOTHIDE
+		// jbroot apps are jailbreak apps: register as System so they behave like Sileo-installed apps
+		BOOL registerAsUser = [path hasPrefix:@"/var/containers"] && !isRemovableSystemApp && !forceSystem && ![path containsString:@".jbroot-"];
+#else
 		BOOL registerAsUser = [path hasPrefix:@"/var/containers"] && !isRemovableSystemApp && !forceSystem;
+#endif
 
 		NSMutableDictionary *dictToRegister = [NSMutableDictionary dictionary];
 

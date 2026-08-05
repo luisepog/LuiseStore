@@ -369,6 +369,14 @@ NSArray* luiseStoreInstalledAppContainerPathsInternal(NSString *marker)
 		}
 	}
 
+#ifdef THEOS_PACKAGE_SCHEME_ROOTHIDE
+	// Roothide installs app bundles into jbroot/Applications (see installApp) where
+	// AMFI accepts ad-hoc signatures. Per-app markers are handled in
+	// luiseStoreInstalledAppBundlePathsInternal; do NOT add jbroot/Applications here
+	// as a "container" because uninstall would then try to delete the whole directory
+	// (which is shared with Sileo/Zebra apps).
+#endif
+
 	return appContainerPaths.copy;
 }
 
@@ -389,7 +397,20 @@ NSArray* luiseStoreInstalledAppBundlePathsInternal(NSString *marker)
 		{
 			if([item.pathExtension isEqualToString:@"app"])
 			{
-				[appPaths addObject:[containerPath stringByAppendingPathComponent:item]];
+				NSString* appPath = [containerPath stringByAppendingPathComponent:item];
+#ifdef THEOS_PACKAGE_SCHEME_ROOTHIDE
+				if([containerPath isEqualToString:jbroot(@"/Applications")])
+				{
+					// jbroot/Applications is shared with Sileo/Zebra apps; only count
+					// bundles that carry our per-app marker (see installApp).
+					NSString* appMarkerPath = [appPath stringByAppendingPathComponent:marker];
+					if(![[NSFileManager defaultManager] fileExistsAtPath:appMarkerPath])
+					{
+						continue;
+					}
+				}
+#endif
+				[appPaths addObject:appPath];
 			}
 		}
 	}

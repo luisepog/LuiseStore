@@ -917,6 +917,58 @@ int installApp(NSString* appPackagePath, BOOL sign, BOOL force, BOOL isLSUpdate,
 	}
 
 	MCMAppContainer* appContainer = [MCMAppContainer containerWithIdentifier:appId createIfNecessary:NO existed:nil error:nil];
+#ifdef THEOS_PACKAGE_SCHEME_ROOTHIDE
+	(void)appContainer; // bundle install handled below via jbroot/Applications
+#endif
+#ifdef THEOS_PACKAGE_SCHEME_ROOTHIDE
+	// On roothide the bundle lives in jbroot/Applications, not in an MCM app bundle container.
+	NSString* jbApplicationsPath = jbroot(@"/Applications");
+	NSURL* bundleContainerURL = [NSURL fileURLWithPath:jbApplicationsPath];
+	NSString* existingBundlePath = [jbApplicationsPath stringByAppendingPathComponent:appBundleToInstallPath.lastPathComponent];
+	BOOL appExistsInJbroot = [[NSFileManager defaultManager] fileExistsAtPath:existingBundlePath];
+	NSURL* appBundleURL = appExistsInJbroot ? [NSURL fileURLWithPath:existingBundlePath] : nil;
+	NSURL* existingMarkURL = appBundleURL ? [appBundleURL URLByAppendingPathComponent:LS_ACTIVE_MARKER] : nil;
+	NSURL* otherMarkerURL = [bundleContainerURL URLByAppendingPathComponent:LS_INACTIVE_MARKER];
+	if(appBundleURL && ![existingMarkURL checkResourceIsReachableAndReturnError:nil] && !force)
+	{
+		NSLog(@"[installApp] already installed and not a LuiseStore app... bailing out");
+		return 171;
+	}
+	else if (appBundleURL) {
+		// When overwriting an app that has been installed with a different LuiseStore flavor, make sure to remove the marker of said flavor
+		if ([otherMarkerURL checkResourceIsReachableAndReturnError:nil]) {
+			[[NSFileManager defaultManager] removeItemAtURL:otherMarkerURL error:nil];
+		}
+	}
+
+	// Terminate app if it's still running
+	if(!isLSUpdate)
+	{
+		BKSTerminateApplicationForReasonAndReportWithDescription(appId, 5, false, @"LuiseStore - App updated");
+	}
+
+	NSLog(@"[installApp] replacing existing app with new version");
+
+	// Delete existing .app directory if it exists
+	if(appBundleURL)
+	{
+		[[NSFileManager defaultManager] removeItemAtURL:appBundleURL error:nil];
+	}
+
+	NSString* newAppBundlePath = [bundleContainerURL.path stringByAppendingPathComponent:appBundleToInstallPath.lastPathComponent];
+	NSLog(@"[installApp] new app path: %@", newAppBundlePath);
+
+	// Install new version into existing app bundle
+	NSError* copyError;
+	BOOL suc = [[NSFileManager defaultManager] copyItemAtPath:appBundleToInstallPath toPath:newAppBundlePath error:&copyError];
+	if(!suc)
+	{
+		NSLog(@"[installApp] Error copying new version during update: %@", copyError);
+		return 178;
+	}
+	// Bundle already placed above; skip the "initial install" copy below
+	BOOL roothideBundleInstalled = YES;
+#else
 	if(appContainer)
 	{
 		// App update
@@ -969,8 +1021,12 @@ int installApp(NSString* appPackagePath, BOOL sign, BOOL force, BOOL isLSUpdate,
 	}
 	else
 	{
+#endif
 		// Initial app install
 		BOOL systemMethodSuccessful = NO;
+#ifdef THEOS_PACKAGE_SCHEME_ROOTHIDE
+		if (roothideBundleInstalled) systemMethodSuccessful = YES;
+#endif
 		if(useInstalldMethod)
 		{
 			// System method
@@ -1012,6 +1068,29 @@ int installApp(NSString* appPackagePath, BOOL sign, BOOL force, BOOL isLSUpdate,
 
 		if(!systemMethodSuccessful)
 		{
+#ifdef THEOS_PACKAGE_SCHEME_ROOTHIDE
+			// On roothide, apps installed into the rootfs MCM container get rejected by
+			// AMFI ("no CMS blob") since there is no CoreTrust bypass and (usually) no AppSync.
+			// Roothide's kernel patch only allows ad-hoc signed apps inside jbroot, so install
+			// the bundle to jbroot/Applications like Sileo/Zebra do for .deb apps.
+			NSLog(@"[installApp] doing roothide installation into jbroot/Applications");
+			NSString* jbApplicationsPath = jbroot(@"/Applications");
+			NSError* dirError;
+			if(![[NSFileManager defaultManager] createDirectoryAtPath:jbApplicationsPath withIntermediateDirectories:YES attributes:nil error:&dirError])
+			{
+				NSLog(@"[installApp] failed to create jbroot Applications dir: %@", dirError);
+				return 170;
+			}
+			NSString* newAppBundlePath = [jbApplicationsPath stringByAppendingPathComponent:appBundleToInstallPath.lastPathComponent];
+			NSLog(@"[installApp] new app path: %@", newAppBundlePath);
+			NSError* copyError;
+			BOOL suc = [[NSFileManager defaultManager] copyItemAtPath:appBundleToInstallPath toPath:newAppBundlePath error:&copyError];
+			if(!suc)
+			{
+				NSLog(@"[installApp] Failed to copy app bundle for app %@, error: %@", appId, copyError);
+				return 178;
+			}
+#else
 			// Custom method
 			// Manually create app bundle via MCM apis and move app there
 			NSLog(@"[installApp] doing custom installation using MCMAppContainer");
@@ -1040,8 +1119,42 @@ int installApp(NSString* appPackagePath, BOOL sign, BOOL force, BOOL isLSUpdate,
 				return 178;
 			}
 		}
+#endif
 	}
 
+#ifdef THEOS_PACKAGE_SCHEME_ROOTHIDE
+	// No MCM app bundle container on roothide; the bundle lives in jbroot/Applications.
+	// Only create the data container (used by registerPath) so the app gets a proper sandbox container.
+	MCMContainer* appDataContainer = [NSClassFromString(@"MCMAppDataContainer") containerWithIdentifier:appId createIfNecessary:YES existed:nil error:nil];
+	(void)appDataContainer;
+	NSString* bundleContainerPath = jbroot(@"/Applications");
+	NSString* appBundlePathInJbroot = [bundleContainerPath stringByAppendingPathComponent:appBundleToInstallPath.lastPathComponent];
+	NSURL* updatedAppURL = [NSURL fileURLWithPath:appBundlePathInJbroot];
+
+	// Mark app as LuiseStore app. jbroot/Applications is shared with Sileo/Zebra apps,
+	// so the marker goes inside the app bundle (per-app), not next to the bundle.
+	NSURL* luiseStoreMarkURL = [NSURL fileURLWithPath:[appBundlePathInJbroot stringByAppendingPathComponent:LS_ACTIVE_MARKER]];
+	if(![[NSFileManager defaultManager] fileExistsAtPath:luiseStoreMarkURL.path])
+	{
+		NSError* creationError;
+		NSData* emptyData = [NSData data];
+		BOOL marked = [emptyData writeToURL:luiseStoreMarkURL options:0 error:&creationError];
+		if(!marked)
+		{
+			NSLog(@"[installApp] failed to mark %@ as LuiseStore app by creating %@, error: %@", appId, luiseStoreMarkURL.path, creationError);
+			return 177;
+		}
+	}
+
+	fixPermissionsOfAppBundle(updatedAppURL.path);
+	if (!skipUICache) {
+		// Apps in jbroot are jailbreak apps: always register as System so they show up like Sileo-installed apps
+		if (!registerPath(updatedAppURL.path, 0, YES)) {
+			[[NSFileManager defaultManager] removeItemAtURL:updatedAppURL error:nil];
+			return 181;
+		}
+	}
+#else
 	appContainer = [MCMAppContainer containerWithIdentifier:appId createIfNecessary:NO existed:nil error:nil];
 
 	// Mark app as LuiseStore app
@@ -1068,6 +1181,10 @@ int installApp(NSString* appPackagePath, BOOL sign, BOOL force, BOOL isLSUpdate,
 			return 181;
 		}
 	}
+#ifndef THEOS_PACKAGE_SCHEME_ROOTHIDE
+	}
+#endif
+#endif
 
 	// Handle developer mode after installing and registering the app, to ensure that we
 	// don't arm developer mode but then fail to install the app
@@ -1103,7 +1220,18 @@ int uninstallApp(NSString* appPath, NSString* appId, BOOL useCustomMethod)
 		// Special case, something is wrong about this app
 		// Most likely the Info.plist is missing
 		// (Hopefully this never happens)
+#ifdef THEOS_PACKAGE_SCHEME_ROOTHIDE
+		if([appPath.pathExtension isEqualToString:@"app"])
+		{
+			deleteSuc = [[NSFileManager defaultManager] removeItemAtPath:appPath error:nil];
+		}
+		else
+		{
+			deleteSuc = [[NSFileManager defaultManager] removeItemAtPath:[appPath stringByDeletingLastPathComponent] error:nil];
+		}
+#else
 		deleteSuc = [[NSFileManager defaultManager] removeItemAtPath:[appPath stringByDeletingLastPathComponent] error:nil];
+#endif
 		registerPath(appPath, YES, YES);
 		return 0;
 	}
@@ -1143,6 +1271,20 @@ int uninstallApp(NSString* appPath, NSString* appId, BOOL useCustomMethod)
 			}
 		}
 
+#ifdef THEOS_PACKAGE_SCHEME_ROOTHIDE
+		// jbroot apps live in jbroot/Applications (shared dir): only remove the app bundle,
+		// never the parent directory. LSApplicationWorkspace uninstall would also work but
+		// the custom removal below is more predictable here.
+		if(appPath && [appPath.pathExtension isEqualToString:@"app"])
+		{
+			deleteSuc = [[NSFileManager defaultManager] removeItemAtPath:appPath error:nil];
+		}
+		else
+		{
+			deleteSuc = [[NSFileManager defaultManager] removeItemAtPath:[appPath stringByDeletingLastPathComponent] error:nil];
+		}
+		registerPath(appPath, YES, YES);
+#else
 		BOOL systemMethodSuccessful = NO;
 		if(!useCustomMethod)
 		{
@@ -1158,6 +1300,7 @@ int uninstallApp(NSString* appPath, NSString* appId, BOOL useCustomMethod)
 		{
 			deleteSuc = systemMethodSuccessful;
 		}
+#endif
 	}
 
 	if(deleteSuc)
@@ -1177,7 +1320,13 @@ int uninstallAppByPath(NSString* appPath, BOOL useCustomMethod)
 
 	NSString* standardizedAppPath = appPath.stringByStandardizingPath;
 
-	if(![standardizedAppPath hasPrefix:@"/var/containers/Bundle/Application/"] && standardizedAppPath.pathComponents.count == 5)
+#ifdef THEOS_PACKAGE_SCHEME_ROOTHIDE
+	// jbroot app bundle paths (…/Applications/Foo.app) are allowed as well
+	BOOL validPath = [standardizedAppPath hasPrefix:@"/var/containers/Bundle/Application/"] || [standardizedAppPath.pathExtension isEqualToString:@"app"];
+#else
+	BOOL validPath = [standardizedAppPath hasPrefix:@"/var/containers/Bundle/Application/"];
+#endif
+	if(!validPath && standardizedAppPath.pathComponents.count == 5)
 	{
 		return 1;
 	}
