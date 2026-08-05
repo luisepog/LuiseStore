@@ -10,19 +10,32 @@ on:
     tags:
       - 'v*.*.*'
 
-env:
-  THEOS: ${{ github.workspace }}/theos
-  THEOS_PACKAGE_SCHEME: rootless
-  FINALPACKAGE: 1
-
 permissions:
   contents: write
 
 jobs:
   build:
-    name: Build LuiseStore
+    name: Build ${{ matrix.name }}
     runs-on: macos-14
     timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: main
+            scheme: rootless
+            make_target: ci-build
+          - name: lite
+            scheme: rootless
+            make_target: luisestore_lite
+          - name: roothide
+            scheme: roothide
+            make_target: luisestore_lite_roothide
+
+    env:
+      THEOS: ${{ github.workspace }}/theos
+      THEOS_PACKAGE_SCHEME: ${{ matrix.scheme }}
+      FINALPACKAGE: 1
 
     steps:
       - name: Setup Xcode
@@ -70,12 +83,6 @@ jobs:
           brew link --force --overwrite libplist || true
           brew link --force --overwrite libb2 || true
 
-          # Verify libarchive installation
-          echo "Checking libarchive installation..."
-          brew list libarchive
-          ls -la $(brew --prefix)/opt/libarchive/ || true
-          ls -la $(brew --prefix)/Cellar/libarchive/ || true
-
       - name: Cache THEOS framework
         id: cache-theos
         uses: actions/cache@v4
@@ -103,50 +110,89 @@ jobs:
             iPhoneOS14.5.sdk
             iPhoneOS16.5.sdk
 
-      - name: Build LuiseStore
+      - name: Build ${{ matrix.name }}
         timeout-minutes: 45
         run: |
-          # Debug: Check brew prefix and libarchive location
-          echo "Brew prefix: $(brew --prefix)"
-          echo "Libarchive location: $(brew --prefix)/opt/libarchive"
-          ls -la $(brew --prefix)/opt/libarchive/include/ || echo "libarchive include not found"
+          make ${{ matrix.make_target }}
 
-          make ci-build
-          make luisestore_lite_roothide
+      - name: Verify roothide helper links libroothide
+        if: matrix.name == 'roothide'
+        run: |
+          BIN=./RootHelper/.theos/obj/arm64/luisestorehelper_lite
+          if [ ! -f "$BIN" ]; then
+            echo "ERROR: $BIN not found after build"
+            exit 1
+          fi
+          if ! strings "$BIN" | grep -q "libroothide.dylib"; then
+            echo "ERROR: luisestorehelper_lite is NOT linked against libroothide.dylib"
+            echo "rootfs()/jbroot() fall back to no-op stubs -> ldid gets wrong paths -> error 175"
+            exit 1
+          fi
+          echo "OK: helper linked with libroothide.dylib"
 
-      - name: Create artifacts staging directory
+      - name: Collect artifacts (${{ matrix.name }})
         run: |
           mkdir -p artifacts
-
-      - name: Collect build outputs from _build directory
-        run: |
-          # Collect tar and ipa files from _build directory
-          if [ -d "_build" ]; then
-            echo "Collecting artifacts from _build directory..."
-            find _build -type f \( -name "*.tar" -o -name "*.ipa" \) -exec cp -v {} artifacts/ \;
-          else
-            echo "Warning: _build directory not found"
-          fi
-
-      - name: Collect deb packages
-        run: |
-          # Find and collect all deb packages from .theos/packages and packages directories
-          echo "Collecting deb packages..."
-          find . -type f -name "*.deb" \( -path "*/.theos/packages/*" -o -path "*/packages/*" \) ! -path "./LuiseStoreLiteRoothide/*" -exec cp -v {} artifacts/ \;
-
-          # RootHide shares the regular Lite package ID/version, so give it a stable unique artifact name
-          find ./LuiseStoreLiteRoothide -type f -name "*.deb" \( -path "*/.theos/packages/*" -o -path "*/packages/*" \) -exec cp -v {} artifacts/LuiseStoreLiteRoothide.deb \;
-          test -f artifacts/LuiseStoreLiteRoothide.deb
-
-          # List what we found
-          echo "Deb packages found:"
-          find . -type f -name "*.deb" \( -path "*/.theos/packages/*" -o -path "*/packages/*" \)
+          case "${{ matrix.name }}" in
+            main)
+              cp -v _build/*.tar artifacts/ 2>/dev/null || true
+              find . -type f -name "*.deb" \( -path "*/.theos/packages/*" -o -path "*/packages/*" \) \
+                ! -path "./LuiseStoreLite/*" ! -path "./LuiseStoreLiteRoothide/*" \
+                -exec cp -v {} artifacts/ \;
+              ;;
+            lite)
+              find ./LuiseStoreLite -type f -name "*.deb" \( -path "*/.theos/packages/*" -o -path "*/packages/*" \) \
+                -exec cp -v {} artifacts/ \;
+              ;;
+            roothide)
+              # RootHide shares the regular Lite package ID/version, give it a stable unique name
+              find ./LuiseStoreLiteRoothide -type f -name "*.deb" \( -path "*/.theos/packages/*" -o -path "*/packages/*" \) \
+                -exec cp -v {} artifacts/LuiseStoreLiteRoothide.deb \;
+              test -f artifacts/LuiseStoreLiteRoothide.deb
+              ;;
+          esac
 
       - name: List collected artifacts
         run: |
           echo "Collected artifacts:"
           ls -lh artifacts/
-          echo ""
+          echo "Total artifacts: $(ls -1 artifacts/ | wc -l)"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: luisestore-build-${{ matrix.name }}-${{ github.sha }}
+          path: artifacts/
+          retention-days: 90
+          if-no-files-found: error
+
+  release:
+    name: Create Release
+    needs: build
+    if: |
+      success() && (
+        github.ref == 'refs/heads/main' ||
+        github.ref == 'refs/heads/release' ||
+        startsWith(github.ref, 'refs/tags/v')
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: luisestore-build-*
+          merge-multiple: true
+          path: artifacts
+
+      - name: List downloaded artifacts
+        run: |
+          ls -lh artifacts/
           echo "Total artifacts: $(ls -1 artifacts/ | wc -l)"
 
       - name: Extract version information
@@ -161,57 +207,21 @@ jobs:
             # Fallback: Extract version from Info.plist
             PLIST_PATH="LuiseStore/Resources/Info.plist"
             if [ -f "$PLIST_PATH" ]; then
-              # Use PlistBuddy to read CFBundleVersion
               VERSION=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST_PATH" 2>/dev/null || echo "")
-
-              # If CFBundleVersion is empty or not found, try CFBundleShortVersionString
               if [ -z "$VERSION" ]; then
                 VERSION=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$PLIST_PATH" 2>/dev/null || echo "unknown")
               fi
-
               echo "Version extracted from Info.plist: $VERSION"
             else
               echo "Warning: Info.plist not found, using 'unknown' as version"
               VERSION="unknown"
             fi
           fi
-
-          # Store version in environment variable for later steps
           echo "VERSION=$VERSION" >> $GITHUB_ENV
-
-          # Also output as step output for conditional use
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-
           echo "Final version: $VERSION"
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: luisestore-build-${{ env.VERSION }}-${{ github.sha }}
-          path: artifacts/
-          retention-days: 90
-          if-no-files-found: error
-
-      - name: Upload artifacts on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: failed-build-artifacts-${{ github.sha }}
-          path: |
-            _build/
-            **/.theos/obj/
-            **/.theos/packages/
-            artifacts/
-          retention-days: 30
-          if-no-files-found: warn
-
       - name: Create GitHub Release
-        if: |
-          success() && (
-            github.ref == 'refs/heads/main' ||
-            github.ref == 'refs/heads/release' ||
-            startsWith(github.ref, 'refs/tags/v')
-          )
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || format('v{0}', env.VERSION) }}
@@ -227,10 +237,10 @@ jobs:
             - **Build Date**: ${{ github.event.head_commit.timestamp }}
 
             ### Artifacts
-            This release includes the following build artifacts:
             - LuiseStore.tar - Main LuiseStore package
-            - LuiseHelper and LuiseStoreLite deb packages
+            - LuiseStoreLite deb package
             - LuiseStoreLiteRoothide.deb - RootHide package
+            - Helper and PersistenceHelper deb packages
 
             Note: Installer IPAs are not included in automated builds as they require a victim IPA.
 
