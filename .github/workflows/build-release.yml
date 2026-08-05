@@ -113,18 +113,28 @@ jobs:
       - name: Build ${{ matrix.name }}
         timeout-minutes: 45
         run: |
+          if [ "${{ matrix.name }}" = "roothide" ]; then
+            echo "=== DEBUG: dry-run link flags ==="
+            make -C RootHelper -n LUISESTORE_LITE=1 THEOS_PACKAGE_SCHEME=roothide 2>&1 | grep -oE '\-lroothide|\-lroot|-D THEOS_PACKAGE_SCHEME_[A-Z]+=1' | sort | uniq -c
+            echo "=== DEBUG: compile flags main.m ==="
+            make -C RootHelper -n LUISESTORE_LITE=1 THEOS_PACKAGE_SCHEME=roothide 2>&1 | grep -m1 "main.m" | grep -oE 'THEOS_PACKAGE_SCHEME_[A-Z]+' | sort -u
+          fi
           make VERBOSE=1 ${{ matrix.make_target }}
 
       - name: Verify roothide helper links libroothide
         if: matrix.name == 'roothide'
         run: |
           BIN=./RootHelper/.theos/obj/arm64/luisestorehelper_lite
+          BIN2=./RootHelper/.theos/obj/luisestorehelper_lite
+          echo "BIN1 exists: $(test -f $BIN && echo yes || echo no)"
+          echo "BIN2 exists: $(test -f $BIN2 && echo yes || echo no)"
+          if [ -f "$BIN2" ]; then BIN=$BIN2; fi
           if [ ! -f "$BIN" ]; then
             echo "ERROR: $BIN not found after build"
             exit 1
           fi
           if ! strings "$BIN" | grep -q "libroothide.dylib"; then
-            echo "ERROR: luisestorehelper_lite is NOT linked against libroothide.dylib"
+            echo "ERROR: $BIN is NOT linked against libroothide.dylib"
             echo "rootfs()/jbroot() fall back to no-op stubs -> ldid gets wrong paths -> error 175"
             exit 1
           fi
