@@ -512,23 +512,23 @@ int signAdhoc(NSString *filePath, NSDictionary *entitlements)
 	//else {
 		if(!isLdidInstalled()) return 173;
 
-		NSString *entitlementsPath = nil;
-		NSString *signArg = @"-s";
-		NSString* errorOutput;
-		if(entitlements)
-		{
-			NSData *entitlementsXML = [NSPropertyListSerialization dataWithPropertyList:entitlements format:NSPropertyListXMLFormat_v1_0 options:0 error:nil];
-			if (entitlementsXML) {
-				entitlementsPath = [[NSTemporaryDirectory() stringByAppendingPathComponent:[NSUUID UUID].UUIDString] stringByAppendingPathExtension:@"plist"];
-				[entitlementsXML writeToFile:entitlementsPath atomically:NO];
-				signArg = [@"-S" stringByAppendingString:entitlementsPath];
+			NSString *entitlementsPath = nil;
+			NSString *signArg = @"-s";
+			NSString* errorOutput;
+			if(entitlements)
+			{
+				NSData *entitlementsXML = [NSPropertyListSerialization dataWithPropertyList:entitlements format:NSPropertyListXMLFormat_v1_0 options:0 error:nil];
+				if (entitlementsXML) {
+					entitlementsPath = [[filePath stringByDeletingLastPathComponent] stringByAppendingPathComponent:[NSUUID UUID].UUIDString];
+					[entitlementsXML writeToFile:entitlementsPath atomically:NO];
+					signArg = [@"-S" stringByAppendingString:entitlementsPath];
+				}
+				
 			}
-			
-		}
-		int ldidRet = runLdid(@[signArg, rootfs(filePath)], nil, &errorOutput);
-		if (entitlementsPath) {
-			[[NSFileManager defaultManager] removeItemAtPath:entitlementsPath error:nil];
-		}
+			int ldidRet = runLdid(@[signArg, filePath], nil, &errorOutput);
+			if (entitlementsPath) {
+				[[NSFileManager defaultManager] removeItemAtPath:entitlementsPath error:nil];
+			}
 
 		NSLog(@"ldid exited with status %d", ldidRet);
 
