@@ -525,13 +525,15 @@ int signAdhoc(NSString *filePath, NSDictionary *entitlements)
 					entitlementsPath = [[filePath stringByDeletingLastPathComponent] stringByAppendingPathComponent:[NSUUID UUID].UUIDString];
 					BOOL writeSuc = [entitlementsXML writeToFile:entitlementsPath atomically:NO];
 					NSLog(@"[signAdhoc] write entitlements %@ => %d (exists: %d)", entitlementsPath, writeSuc, [[NSFileManager defaultManager] fileExistsAtPath:entitlementsPath]);
+					NSString* entRootfs = [@"/rootfs" stringByAppendingString:entitlementsPath];
 					NSString* entJbroot = jbroot(entitlementsPath);
-					NSLog(@"[signAdhoc] entitlements jbroot=%@ exists=%d", entJbroot, [[NSFileManager defaultManager] fileExistsAtPath:entJbroot]);
-					signArg = [@"-S" stringByAppendingString:entJbroot];
+					NSLog(@"[signAdhoc] entitlements rootfs-view=%@ exists=%d | jbroot-view=%@ exists=%d", entRootfs, [[NSFileManager defaultManager] fileExistsAtPath:entRootfs], entJbroot, [[NSFileManager defaultManager] fileExistsAtPath:entJbroot]);
+					signArg = [@"-S" stringByAppendingString:entRootfs];
 				}
 				
 			}
-			int ldidRet = runLdid(@[signArg, jbroot(filePath)], nil, &errorOutput);
+			NSString* fileRootfs = [@"/rootfs" stringByAppendingString:filePath];
+			int ldidRet = runLdid(@[signArg, fileRootfs], nil, &errorOutput);
 			if (entitlementsPath) {
 				[[NSFileManager defaultManager] removeItemAtPath:entitlementsPath error:nil];
 			}
