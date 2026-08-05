@@ -144,13 +144,17 @@ jobs:
 
       - name: Upload debug artifacts on failure
         if: failure()
+        run: |
+          tar -czf debug-helper.tar.gz \
+            RootHelper/.theos/obj/arm64/luisestorehelper_lite \
+            RootHelper/.theos/obj/luisestorehelper_lite 2>/dev/null || true
+          ls -la debug-helper.tar.gz 2>/dev/null || echo "no debug tar"
+      - name: Upload debug tar
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: debug-${{ matrix.name }}-${{ github.sha }}
-          path: |
-            RootHelper/.theos/obj/arm64/luisestorehelper_lite
-            RootHelper/.theos/obj/arm64/luisestorehelper
-            **/.theos/obj/
+          path: debug-helper.tar.gz
           retention-days: 30
           if-no-files-found: warn
 
