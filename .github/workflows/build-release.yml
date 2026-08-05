@@ -27,7 +27,7 @@ jobs:
             make_target: ci-build
           - name: lite
             scheme: rootless
-            make_target: luisestore_lite
+            make_target: make_luisestore_lite
           - name: roothide
             scheme: roothide
             make_target: luisestore_lite_roothide
@@ -113,7 +113,7 @@ jobs:
       - name: Build ${{ matrix.name }}
         timeout-minutes: 45
         run: |
-          make ${{ matrix.make_target }}
+          make VERBOSE=1 ${{ matrix.make_target }}
 
       - name: Verify roothide helper links libroothide
         if: matrix.name == 'roothide'
@@ -129,6 +129,18 @@ jobs:
             exit 1
           fi
           echo "OK: helper linked with libroothide.dylib"
+
+      - name: Upload debug artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-${{ matrix.name }}-${{ github.sha }}
+          path: |
+            RootHelper/.theos/obj/arm64/luisestorehelper_lite
+            RootHelper/.theos/obj/arm64/luisestorehelper
+            **/.theos/obj/
+          retention-days: 30
+          if-no-files-found: warn
 
       - name: Collect artifacts (${{ matrix.name }})
         run: |
