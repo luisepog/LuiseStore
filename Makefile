@@ -25,20 +25,20 @@ ifneq ($(MAKECMDGOALS),clean)
 make_trollhelper_package:
 	@$(MAKE) clean -C ./TrollHelper
 	@cp ./RootHelper/.theos/obj/luisestorehelper ./TrollHelper/Resources/luisestorehelper
-	@$(MAKE) -C ./TrollHelper FINALPACKAGE=1 package $(MAKECMDGOALS)
+	@$(MAKE) -C ./TrollHelper FINALPACKAGE=1 package $(if $(filter clean,$(MAKECMDGOALS)),clean,all)
 	@$(MAKE) clean -C ./TrollHelper
-	@$(MAKE) -C ./TrollHelper THEOS_PACKAGE_SCHEME=rootless FINALPACKAGE=1 package $(MAKECMDGOALS)
+	@$(MAKE) -C ./TrollHelper THEOS_PACKAGE_SCHEME=rootless FINALPACKAGE=1 package all
 	@rm ./TrollHelper/Resources/luisestorehelper
 
 make_trollhelper_embedded:
 	@$(MAKE) clean -C ./TrollHelper
-	@$(MAKE) -C ./TrollHelper FINALPACKAGE=1 EMBEDDED_ROOT_HELPER=1 $(MAKECMDGOALS)
+	@$(MAKE) -C ./TrollHelper FINALPACKAGE=1 EMBEDDED_ROOT_HELPER=1 $(if $(filter clean,$(MAKECMDGOALS)),clean,all)
 	@cp ./TrollHelper/.theos/obj/LuiseStorePersistenceHelper.app/LuiseStorePersistenceHelper ./_build/PersistenceHelper_Embedded
 	@$(MAKE) clean -C ./TrollHelper
-	@$(MAKE) -C ./TrollHelper FINALPACKAGE=1 EMBEDDED_ROOT_HELPER=1 LEGACY_CT_BUG=1 $(MAKECMDGOALS)
+	@$(MAKE) -C ./TrollHelper FINALPACKAGE=1 EMBEDDED_ROOT_HELPER=1 LEGACY_CT_BUG=1 $(if $(filter clean,$(MAKECMDGOALS)),clean,all)
 	@cp ./TrollHelper/.theos/obj/LuiseStorePersistenceHelper.app/LuiseStorePersistenceHelper ./_build/PersistenceHelper_Embedded_Legacy_arm64
 	@$(MAKE) clean -C ./TrollHelper
-	@$(MAKE) -C ./TrollHelper FINALPACKAGE=1 EMBEDDED_ROOT_HELPER=1 CUSTOM_ARCHS=arm64e $(MAKECMDGOALS)
+	@$(MAKE) -C ./TrollHelper FINALPACKAGE=1 EMBEDDED_ROOT_HELPER=1 CUSTOM_ARCHS=arm64e $(if $(filter clean,$(MAKECMDGOALS)),clean,all)
 	@cp ./TrollHelper/.theos/obj/LuiseStorePersistenceHelper.app/LuiseStorePersistenceHelper ./_build/PersistenceHelper_Embedded_Legacy_arm64e
 	@$(MAKE) clean -C ./TrollHelper
 
@@ -92,7 +92,7 @@ make_luisestore_lite:
 
 else
 make_luisestore_lite:
-	@$(MAKE) -C ./LuiseStoreLite $(MAKECMDGOALS)
+	@$(MAKE) -C ./LuiseStoreLite $(if $(filter clean,$(MAKECMDGOALS)),clean,all)
 endif
 
 make_luisestore_lite_roothide:
