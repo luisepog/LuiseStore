@@ -4,6 +4,9 @@ $(TOPTARGETS): pre_build make_fastPathSign make_roothelper make_luisestore make_
 
 luisestore_lite_roothide: make_luisestore_lite_roothide
 
+# CI entrypoint: full build without victim-IPA-dependent installer targets
+ci-build: pre_build make_fastPathSign make_roothelper make_luisestore make_trollhelper_embedded make_trollhelper_package assemble_luisestore make_luisestore_lite
+
 pre_build:
 	@rm -rf ./_build 2>/dev/null || true
 	@mkdir -p ./_build
@@ -100,4 +103,4 @@ make_luisestore_lite_roothide:
 	@cp ./RootHelper/.theos/obj/luisestorehelper_lite ./LuiseStoreLiteRoothide/Resources/luisestorehelper
 	@$(MAKE) -C ./LuiseStoreLiteRoothide package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=roothide
 
-.PHONY: $(TOPTARGETS) luisestore_lite_roothide pre_build assemble_luisestore make_trollhelper_package make_trollhelper_embedded build_installer15 build_installer64e make_luisestore_lite_roothide
+.PHONY: $(TOPTARGETS) ci-build luisestore_lite_roothide pre_build assemble_luisestore make_trollhelper_package make_trollhelper_embedded build_installer15 build_installer64e make_luisestore_lite_roothide
