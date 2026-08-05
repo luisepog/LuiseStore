@@ -1,7 +1,7 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: TrollStore
+Upstream-Name: LuiseStore
 Upstream-Contact: opa334 <opa334@protonmail.com>
-Source: https://github.com/opa334/TrollStore
+Source: https://github.com/luisepog/LuiseStore
 
 Files: *
 Copyright: 2022-2026 Lars Fröder

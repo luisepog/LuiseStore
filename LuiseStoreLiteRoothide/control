@@ -1,0 +1,9 @@
+Package: com.opa334.luisestorelite
+Name: LuiseStore Lite (RootHide)
+Version: 2.1.1
+Architecture: iphoneos-arm
+Description: LuiseStore for RootHide jailbroken iOS
+Depends: ldid
+Maintainer: opa334
+Author: opa334
+Section: Applications

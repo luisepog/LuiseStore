@@ -6,7 +6,7 @@ body:
       value: |
         # Before post issue please read me
         Your issue may already be reported!
-        Please search on the [issue tracker](https://github.com/opa334/TrollStore/issues) before creating one.
+        Please search on the [issue tracker](https://github.com/luisepog/LuiseStore/issues) before creating one.
 
   - type: checkboxes
     id: no-duplicates-issue
@@ -65,9 +65,9 @@ body:
         # Your Environment
 
   - type: input
-    id: trollstore-version
+    id: luisestore-version
     attributes:
-      label: TrollStore Version
+      label: LuiseStore Version
       description: like TrollInstaller2
     validations:
       required: true

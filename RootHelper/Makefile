@@ -1,10 +1,10 @@
 TARGET := iphone:clang:16.5:14.0
 ARCHS = arm64
 
-ifdef TROLLSTORE_LITE
-HELPER_NAME = trollstorehelper_lite
+ifdef LUISESTORE_LITE
+HELPER_NAME = luisestorehelper_lite
 else
-HELPER_NAME = trollstorehelper
+HELPER_NAME = luisestorehelper
 TARGET_CODESIGN = ../Exploits/fastPathSign/fastPathSign
 endif
 
@@ -14,7 +14,7 @@ TOOL_NAME = $(HELPER_NAME)
 
 $(HELPER_NAME)_FILES = $(wildcard *.m) $(wildcard ../Shared/*.m) $(wildcard ../ChOma/src/*.c)
 
-ifndef TROLLSTORE_LITE
+ifndef LUISESTORE_LITE
 $(HELPER_NAME)_FILES += ../Exploits/fastPathSign/src/coretrust_bug.c ../Exploits/fastPathSign/src/codesign.m
 $(HELPER_NAME)_CODESIGN_FLAGS = --entitlements entitlements.plist
 $(HELPER_NAME)_LDFLAGS = -L../ChOma/external/ios -lcrypto
@@ -36,8 +36,8 @@ endif
 $(HELPER_NAME)_FRAMEWORKS = CoreTelephony CoreServices
 $(HELPER_NAME)_PRIVATE_FRAMEWORKS = SpringBoardServices BackBoardServices MobileContainerManager FrontBoardServices RunningBoardServices
 
-ifdef TROLLSTORE_LITE
-$(HELPER_NAME)_CFLAGS += -DTROLLSTORE_LITE -DDISABLE_SIGNING=1
+ifdef LUISESTORE_LITE
+$(HELPER_NAME)_CFLAGS += -DLUISESTORE_LITE -DDISABLE_SIGNING=1
 endif
 
 include $(THEOS_MAKE_PATH)/tool.mk

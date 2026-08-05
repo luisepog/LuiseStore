@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleExecutable</key>
-	<string>TrollStorePersistenceHelper</string>
+	<string>LuiseStorePersistenceHelper</string>
 	<key>CFBundleDisplayName</key>
 	<string>TrollHelper</string>
 	<key>CFBundleIcons</key>
@@ -40,7 +40,7 @@
 		</dict>
 	</dict>
 	<key>CFBundleIdentifier</key>
-	<string>com.opa334.trollstorepersistencehelper</string>
+	<string>com.opa334.luisestorepersistencehelper</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>
