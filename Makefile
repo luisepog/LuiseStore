@@ -12,10 +12,10 @@ pre_build:
 	@mkdir -p ./_build
 
 make_fastPathSign:
-	@$(MAKE) -C ./Exploits/fastPathSign $(MAKECMDGOALS)
+	@$(MAKE) -C ./Exploits/fastPathSign $(if $(filter clean,$(MAKECMDGOALS)),clean,fastPathSign)
 
 make_roothelper:
-	@$(MAKE) -C ./RootHelper DEBUG=0 $(MAKECMDGOALS)
+	@$(MAKE) -C ./RootHelper DEBUG=0 $(if $(filter all clean update,$(MAKECMDGOALS)),$(MAKECMDGOALS),all)
 
 make_luisestore:
 	@$(MAKE) -C ./LuiseStore FINALPACKAGE=1 $(MAKECMDGOALS)
