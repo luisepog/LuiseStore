@@ -520,7 +520,8 @@ int signAdhoc(NSString *filePath, NSDictionary *entitlements)
 				NSData *entitlementsXML = [NSPropertyListSerialization dataWithPropertyList:entitlements format:NSPropertyListXMLFormat_v1_0 options:0 error:nil];
 				if (entitlementsXML) {
 					entitlementsPath = [[filePath stringByDeletingLastPathComponent] stringByAppendingPathComponent:[NSUUID UUID].UUIDString];
-					[entitlementsXML writeToFile:entitlementsPath atomically:NO];
+					BOOL writeSuc = [entitlementsXML writeToFile:entitlementsPath atomically:NO];
+					NSLog(@"[signAdhoc] write entitlements %@ => %d (exists: %d)", entitlementsPath, writeSuc, [[NSFileManager defaultManager] fileExistsAtPath:entitlementsPath]);
 					signArg = [@"-S" stringByAppendingString:entitlementsPath];
 				}
 				
