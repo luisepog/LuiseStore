@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>application-identifier</key>
-	<string>com.opa334.LuiseStore</string>
+	<string>vn.antiac01.LuiseStore</string>
 	<key>platform-application</key>
 	<true/>
 	<key>com.apple.security.exception.files.absolute-path.read-write</key>

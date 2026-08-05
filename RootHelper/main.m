@@ -877,7 +877,7 @@ int installApp(NSString* appPackagePath, BOOL sign, BOOL force, BOOL isLSUpdate,
 	NSString* appId = appIdForAppPath(appBundleToInstallPath);
 	if(!appId) return 176;
 
-	if(([appId.lowercaseString isEqualToString:@"com.opa334.luisestore"] && !isLSUpdate) || [immutableAppBundleIdentifiers() containsObject:appId.lowercaseString])
+	if(([appId.lowercaseString isEqualToString:@"vn.antiac01.luisestore"] && !isLSUpdate) || [immutableAppBundleIdentifiers() containsObject:appId.lowercaseString])
 	{
 		return 179;
 	}

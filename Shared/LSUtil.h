@@ -11,13 +11,13 @@
 #ifdef LUISESTORE_LITE
 #define LS_ACTIVE_MARKER LS_LITE_MARKER
 #define LS_INACTIVE_MARKER LS_MARKER
-#define APP_ID @"com.opa334.LuiseStoreLite"
+#define APP_ID @"vn.antiac01.LuiseStoreLite"
 #define APP_NAME LS_LITE_NAME
 #define OTHER_APP_NAME LS_NAME
 #else
 #define LS_ACTIVE_MARKER LS_MARKER
 #define LS_INACTIVE_MARKER LS_LITE_MARKER
-#define APP_ID @"com.opa334.LuiseStore"
+#define APP_ID @"vn.antiac01.LuiseStore"
 #define APP_NAME LS_NAME
 #define OTHER_APP_NAME LS_LITE_NAME
 #endif
