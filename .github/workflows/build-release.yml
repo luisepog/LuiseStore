@@ -114,10 +114,12 @@ jobs:
         timeout-minutes: 45
         run: |
           if [ "${{ matrix.name }}" = "roothide" ]; then
-            echo "=== DEBUG: dry-run link flags ==="
-            make -C RootHelper -n LUISESTORE_LITE=1 THEOS_PACKAGE_SCHEME=roothide 2>&1 | grep -oE '\-lroothide|\-lroot|-D THEOS_PACKAGE_SCHEME_[A-Z]+=1' | sort | uniq -c
-            echo "=== DEBUG: compile flags main.m ==="
-            make -C RootHelper -n LUISESTORE_LITE=1 THEOS_PACKAGE_SCHEME=roothide 2>&1 | grep -m1 "main.m" | grep -oE 'THEOS_PACKAGE_SCHEME_[A-Z]+' | sort -u
+            echo "=== DEBUG: raw dry-run (first 60 lines) ==="
+            make -C RootHelper -n LUISESTORE_LITE=1 THEOS_PACKAGE_SCHEME=roothide 2>&1 | head -60
+            echo "=== DEBUG: grep PACKAGE_SCHEME ==="
+            make -C RootHelper -n LUISESTORE_LITE=1 THEOS_PACKAGE_SCHEME=roothide 2>&1 | grep -c "PACKAGE_SCHEME_ROOTHIDE" || true
+            echo "=== DEBUG: make scheme echo ==="
+            make -C RootHelper -n LUISESTORE_LITE=1 THEOS_PACKAGE_SCHEME=roothide 2>&1 | grep -m3 "Compiling\|Linking" | grep -oE 'THEOS_PACKAGE_SCHEME[^ ]*' | sort -u
           fi
           make VERBOSE=1 ${{ matrix.make_target }}
 
