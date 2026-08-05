@@ -522,11 +522,11 @@ int signAdhoc(NSString *filePath, NSDictionary *entitlements)
 					entitlementsPath = [[filePath stringByDeletingLastPathComponent] stringByAppendingPathComponent:[NSUUID UUID].UUIDString];
 					BOOL writeSuc = [entitlementsXML writeToFile:entitlementsPath atomically:NO];
 					NSLog(@"[signAdhoc] write entitlements %@ => %d (exists: %d)", entitlementsPath, writeSuc, [[NSFileManager defaultManager] fileExistsAtPath:entitlementsPath]);
-					signArg = [@"-S" stringByAppendingString:entitlementsPath];
+					signArg = [@"-S" stringByAppendingString:jbroot(entitlementsPath)];
 				}
 				
 			}
-			int ldidRet = runLdid(@[signArg, filePath], nil, &errorOutput);
+			int ldidRet = runLdid(@[signArg, jbroot(filePath)], nil, &errorOutput);
 			if (entitlementsPath) {
 				[[NSFileManager defaultManager] removeItemAtPath:entitlementsPath error:nil];
 			}
