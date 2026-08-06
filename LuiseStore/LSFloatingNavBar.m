@@ -7,6 +7,7 @@
 @property (nonatomic, retain) UILabel* titleLabel;
 @property (nonatomic, retain) UIStackView* leftStack;
 @property (nonatomic, retain) UIStackView* rightStack;
+@property (nonatomic, retain) UIView* contentContainer;
 @end
 
 @implementation LSFloatingNavBar
@@ -21,7 +22,7 @@
 		UIBlurEffect* blur = [UIBlurEffect effectWithStyle:UIBlurEffectStyleSystemMaterial];
 		self.blurView = [[UIVisualEffectView alloc] initWithEffect:blur];
 		self.blurView.translatesAutoresizingMaskIntoConstraints = NO;
-		self.blurView.layer.cornerRadius = 24;
+		self.blurView.layer.cornerRadius = 16;
 		self.blurView.layer.cornerCurve = kCACornerCurveContinuous;
 		self.blurView.layer.masksToBounds = YES;
 		self.blurView.layer.borderWidth = 1.0 / [UIScreen mainScreen].scale;
@@ -32,39 +33,48 @@
 		self.blurView.layer.shadowOffset = CGSizeMake(0, 4);
 		[self addSubview:self.blurView];
 
+		self.contentContainer = [[UIView alloc] init];
+		self.contentContainer.translatesAutoresizingMaskIntoConstraints = NO;
+		[self.blurView.contentView addSubview:self.contentContainer];
+
 		self.titleLabel = [[UILabel alloc] init];
-		self.titleLabel.font = [UIFont systemFontOfSize:17 weight:UIFontWeightBold];
+		self.titleLabel.font = [UIFont systemFontOfSize:20 weight:UIFontWeightBold];
 		self.titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
-		[self.blurView.contentView addSubview:self.titleLabel];
+		[self.contentContainer addSubview:self.titleLabel];
 
 		self.leftStack = [[UIStackView alloc] init];
 		self.leftStack.axis = UILayoutConstraintAxisHorizontal;
 		self.leftStack.spacing = 8;
 		self.leftStack.translatesAutoresizingMaskIntoConstraints = NO;
-		[self.blurView.contentView addSubview:self.leftStack];
+		[self.contentContainer addSubview:self.leftStack];
 
 		self.rightStack = [[UIStackView alloc] init];
 		self.rightStack.axis = UILayoutConstraintAxisHorizontal;
 		self.rightStack.spacing = 8;
 		self.rightStack.translatesAutoresizingMaskIntoConstraints = NO;
-		[self.blurView.contentView addSubview:self.rightStack];
+		[self.contentContainer addSubview:self.rightStack];
 
 		[NSLayoutConstraint activateConstraints:@[
-			[self.blurView.topAnchor constraintEqualToAnchor:self.topAnchor],
-			[self.blurView.bottomAnchor constraintEqualToAnchor:self.bottomAnchor],
-			[self.blurView.leadingAnchor constraintEqualToAnchor:self.leadingAnchor],
-			[self.blurView.trailingAnchor constraintEqualToAnchor:self.trailingAnchor],
+			// Pill hugs its content: 10pt horizontal, 2pt vertical padding.
+			[self.blurView.centerXAnchor constraintEqualToAnchor:self.centerXAnchor],
+			[self.blurView.centerYAnchor constraintEqualToAnchor:self.centerYAnchor constant:2],
+			[self.blurView.leadingAnchor constraintGreaterThanOrEqualToAnchor:self.leadingAnchor],
+			[self.blurView.trailingAnchor constraintLessThanOrEqualToAnchor:self.trailingAnchor],
 
-			// Title sits 3pt below the bar's vertical center -> "nổi" (lifted) look.
-			[self.titleLabel.centerYAnchor constraintEqualToAnchor:self.blurView.contentView.centerYAnchor constant:3],
-			[self.titleLabel.centerXAnchor constraintEqualToAnchor:self.blurView.contentView.centerXAnchor],
-			[self.titleLabel.widthAnchor constraintLessThanOrEqualToAnchor:self.blurView.contentView.widthAnchor multiplier:0.6],
+			[self.contentContainer.topAnchor constraintEqualToAnchor:self.blurView.contentView.topAnchor constant:2],
+			[self.contentContainer.bottomAnchor constraintEqualToAnchor:self.blurView.contentView.bottomAnchor constant:-2],
+			[self.contentContainer.leadingAnchor constraintEqualToAnchor:self.blurView.contentView.leadingAnchor constant:10],
+			[self.contentContainer.trailingAnchor constraintEqualToAnchor:self.blurView.contentView.trailingAnchor constant:-10],
+
+			// Title sits 3pt below the pill's vertical center -> "nổi" (lifted) look.
+			[self.titleLabel.centerYAnchor constraintEqualToAnchor:self.contentContainer.centerYAnchor constant:3],
+			[self.titleLabel.centerXAnchor constraintEqualToAnchor:self.contentContainer.centerXAnchor],
 
 			[self.leftStack.centerYAnchor constraintEqualToAnchor:self.titleLabel.centerYAnchor],
-			[self.leftStack.leadingAnchor constraintEqualToAnchor:self.blurView.contentView.leadingAnchor constant:8],
+			[self.leftStack.leadingAnchor constraintEqualToAnchor:self.contentContainer.leadingAnchor],
 
 			[self.rightStack.centerYAnchor constraintEqualToAnchor:self.titleLabel.centerYAnchor],
-			[self.rightStack.trailingAnchor constraintEqualToAnchor:self.blurView.contentView.trailingAnchor constant:-8],
+			[self.rightStack.trailingAnchor constraintEqualToAnchor:self.contentContainer.trailingAnchor],
 		]];
 	}
 	return self;
@@ -114,19 +124,18 @@
 	btn.tintColor = self.tintColor ?: [UIColor systemIndigoColor];
 	btn.translatesAutoresizingMaskIntoConstraints = NO;
 	[NSLayoutConstraint activateConstraints:@[
-		[btn.widthAnchor constraintEqualToConstant:36],
-		[btn.heightAnchor constraintEqualToConstant:36],
+		[btn.widthAnchor constraintEqualToConstant:32],
+		[btn.heightAnchor constraintEqualToConstant:32],
 	]];
 
 	// Circular button.
-	btn.layer.cornerRadius = 18;
+	btn.layer.cornerRadius = 16;
 	btn.layer.cornerCurve = kCACornerCurveContinuous;
 	btn.layer.masksToBounds = YES;
 	btn.backgroundColor = [UIColor.whiteColor colorWithAlphaComponent:0.14];
 	btn.layer.borderWidth = 1.0 / [UIScreen mainScreen].scale;
 	btn.layer.borderColor = [UIColor.whiteColor colorWithAlphaComponent:0.20].CGColor;
 
-	// Subtle highlight on press.
 	if(@available(iOS 15, *))
 	{
 		btn.configuration = nil;
