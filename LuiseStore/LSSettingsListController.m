@@ -83,6 +83,14 @@ extern NSUserDefaults* luiseStoreUserDefaults(void);
 	// on iOS 15+; just make sure the table blends with the grouped background.
 	self.view.tintColor = [UIColor systemIndigoColor];
 
+	// Even left/right padding on the settings table.
+	UITableView* table = [self valueForKey:@"_table"];
+	if(table)
+	{
+		table.contentInset = UIEdgeInsetsMake(0, 16, 0, 16);
+		table.separatorInset = UIEdgeInsetsMake(0, 16, 0, 16);
+	}
+
 	[self _setUpTableHeader];
 
 #ifndef LUISESTORE_LITE
