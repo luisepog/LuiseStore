@@ -1,6 +1,6 @@
 Package: vn.antiac01.luisestorelite
 Name: LuiseStore Lite (RootHide)
-Version: 2.1.1
+Version: 2.1.2
 Architecture: iphoneos-arm
 Description: LuiseStore for RootHide jailbroken iOS
 Depends: ldid
