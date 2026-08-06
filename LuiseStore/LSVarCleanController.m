@@ -23,10 +23,11 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.navigationController.navigationBar.hidden = NO;
+    self.tableView.showsVerticalScrollIndicator = NO;
     self.tableView.tableFooterView = [[UIView alloc] init];
     self.clearsSelectionOnViewWillAppear = NO;
     self.tableView.backgroundColor = [UIColor systemGroupedBackgroundColor];
-    self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    self.tableView.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
 
     [self setTitle:@"varClean"];
 
@@ -448,10 +449,7 @@ static NSArray *GetDirectoryContents(NSString *path) {
         cell.separatorInset = UIEdgeInsetsMake(0, 16, 0, 16);
     }
 
-    UIView *cardBackground = [LSTheme cleanCardBackgroundWithCornerRadius:12];
-    cardBackground.frame = CGRectInset(cell.bounds, 4, 2);
-    cardBackground.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    cell.backgroundView = cardBackground;
+    cell.backgroundView = nil;
 
     NSDictionary *item = self.tableData[indexPath.section][@"items"][indexPath.row];
     cell.textLabel.text = item[@"name"];
