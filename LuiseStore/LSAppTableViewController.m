@@ -5,7 +5,6 @@
 #import "LSInstallationController.h"
 #import "LSUtil.h"
 #import "LSTheme.h"
-#import "LSFloatingNavBar.h"
 @import UniformTypeIdentifiers;
 
 #define ICON_FORMAT_IPAD 8
@@ -39,7 +38,6 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 @end
 
 @interface LSAppTableViewController ()
-@property (nonatomic, retain) LSFloatingNavBar* floatingNavBar;
 @end
 
 @implementation LSAppTableViewController
@@ -119,59 +117,15 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 	self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
 	self.tableView.backgroundColor = [UIColor systemGroupedBackgroundColor];
 
-	// Hide system nav bar; we use a floating glass bar instead.
-	self.navigationController.navigationBar.hidden = YES;
+	self.title = @"Apps";
 
-	[self _setUpFloatingNavBar];
-}
-
-- (void)_setUpFloatingNavBar
-{
-	self.floatingNavBar = [[LSFloatingNavBar alloc] init];
-	self.floatingNavBar.translatesAutoresizingMaskIntoConstraints = NO;
-	self.floatingNavBar.title = @"Apps";
-	self.floatingNavBar.tintColor = LSTheme.accentColor;
-	[self.view addSubview:self.floatingNavBar];
-
-	// Nav bar floats just below the status bar/notch — auto-calculated from
-	// the safe area. Height is intrinsic: the pill hugs the title.
-	[NSLayoutConstraint activateConstraints:@[
-		[self.floatingNavBar.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor constant:4],
-		[self.floatingNavBar.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor constant:12],
-		[self.floatingNavBar.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor constant:-12],
-	]];
-
-	// Build the install menu (same as before) and attach as right button.
 	[self _setUpNavigationBar];
-
-	// Search as a circular button on the left, level with the + button.
-	UIBarButtonItem* searchBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"magnifyingglass"] style:UIBarButtonItemStylePlain target:self action:@selector(searchPressed:)];
-	self.floatingNavBar.leftButtons = @[searchBarButtonItem];
-
-	[self updateTopInset];
+	[self _setUpSearchBar];
 }
 
 - (void)searchPressed:(UIBarButtonItem*)item
 {
 	[self presentViewController:_searchController animated:YES completion:nil];
-}
-
-- (void)viewDidLayoutSubviews
-{
-	[super viewDidLayoutSubviews];
-	[self updateTopInset];
-}
-
-- (void)updateTopInset
-{
-	[self.floatingNavBar layoutIfNeeded];
-	CGFloat bottom = CGRectGetMaxY(self.floatingNavBar.frame);
-	CGFloat top = bottom - self.tableView.frame.origin.y;
-	if(top < 0) top = 0;
-	UIEdgeInsets insets = self.tableView.contentInset;
-	insets.top = top + 8;
-	self.tableView.contentInset = insets;
-	self.tableView.scrollIndicatorInsets = insets;
 }
 
 - (UILabel*)registrationBadgeForState:(NSString*)state
@@ -258,7 +212,9 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 
 	UIBarButtonItem* installBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"plus"] menu:installMenu];
 
-	self.floatingNavBar.rightButtons = @[installBarButtonItem];
+	UIBarButtonItem* searchBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"magnifyingglass"] style:UIBarButtonItemStylePlain target:self action:@selector(searchPressed:)];
+
+	self.navigationItem.rightBarButtonItems = @[installBarButtonItem, searchBarButtonItem];
 }
 
 - (void)_setUpSearchBar
@@ -266,6 +222,8 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 	_searchController = [[UISearchController alloc] initWithSearchResultsController:nil];
 	_searchController.searchResultsUpdater = self;
 	_searchController.obscuresBackgroundDuringPresentation = NO;
+	self.navigationItem.searchController = _searchController;
+	self.navigationItem.hidesSearchBarWhenScrolling = YES;
 }
 
 - (void)updateSearchResultsForSearchController:(UISearchController *)searchController
