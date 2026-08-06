@@ -6,13 +6,72 @@
 #import "LSInstallationController.h"
 #import "LSSettingsAdvancedListController.h"
 #import "LSDonateListController.h"
+#import <QuartzCore/QuartzCore.h>
 
 @interface NSUserDefaults (Private)
 - (instancetype)_initWithSuiteName:(NSString *)suiteName container:(NSURL *)container;
 @end
+
+@interface UIImage ()
++ (UIImage *)_applicationIconImageForBundleIdentifier:(NSString *)id format:(NSInteger)format scale:(double)scale;
+@end
+
 extern NSUserDefaults* luiseStoreUserDefaults(void);
 
 @implementation LSSettingsListController
+
+- (void)_setUpTableHeader
+{
+	UITableView* table = [self valueForKey:@"_table"];
+	if(!table) return;
+
+	NSString* appId = NSBundle.mainBundle.bundleIdentifier;
+	UIImage* icon = [UIImage _applicationIconImageForBundleIdentifier:appId format:10 scale:[UIScreen mainScreen].scale];
+	if(UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPad)
+	{
+		icon = [UIImage _applicationIconImageForBundleIdentifier:appId format:8 scale:[UIScreen mainScreen].scale];
+	}
+	if(!icon) return;
+
+	UIView* header = [[UIView alloc] initWithFrame:CGRectMake(0, 0, table.bounds.size.width, 130)];
+
+	UIImageView* iconView = [[UIImageView alloc] initWithImage:icon];
+	iconView.layer.cornerRadius = 20;
+	iconView.layer.cornerCurve = kCACornerCurveContinuous;
+	iconView.layer.masksToBounds = YES;
+	iconView.layer.borderWidth = 1;
+	iconView.layer.borderColor = [UIColor.labelColor colorWithAlphaComponent:0.1].CGColor;
+	iconView.translatesAutoresizingMaskIntoConstraints = NO;
+	[header addSubview:iconView];
+
+	UILabel* titleLabel = [[UILabel alloc] init];
+	titleLabel.text = APP_NAME;
+	titleLabel.font = [UIFont systemFontOfSize:24 weight:UIFontWeightBold];
+	titleLabel.textAlignment = NSTextAlignmentCenter;
+	titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
+	[header addSubview:titleLabel];
+
+	UILabel* subtitleLabel = [[UILabel alloc] init];
+	subtitleLabel.text = [NSString stringWithFormat:@"Version %@", [self getLuiseStoreVersion] ?: @""];
+	subtitleLabel.font = [UIFont systemFontOfSize:13];
+	subtitleLabel.textColor = [UIColor secondaryLabelColor];
+	subtitleLabel.textAlignment = NSTextAlignmentCenter;
+	subtitleLabel.translatesAutoresizingMaskIntoConstraints = NO;
+	[header addSubview:subtitleLabel];
+
+	[NSLayoutConstraint activateConstraints:@[
+		[iconView.centerXAnchor constraintEqualToAnchor:header.centerXAnchor],
+		[iconView.topAnchor constraintEqualToAnchor:header.topAnchor constant:12],
+		[iconView.widthAnchor constraintEqualToConstant:88],
+		[iconView.heightAnchor constraintEqualToConstant:88],
+		[titleLabel.centerXAnchor constraintEqualToAnchor:header.centerXAnchor],
+		[titleLabel.topAnchor constraintEqualToAnchor:iconView.bottomAnchor constant:10],
+		[subtitleLabel.centerXAnchor constraintEqualToAnchor:header.centerXAnchor],
+		[subtitleLabel.topAnchor constraintEqualToAnchor:titleLabel.bottomAnchor constant:2],
+	]];
+
+	table.tableHeaderView = header;
+}
 
 - (void)viewDidLoad
 {
@@ -22,7 +81,9 @@ extern NSUserDefaults* luiseStoreUserDefaults(void);
 
 	// Modern grouped look: clear cell backgrounds are already the default
 	// on iOS 15+; just make sure the table blends with the grouped background.
-	self.view.tintColor = [UIColor systemBlueColor];
+	self.view.tintColor = [UIColor systemIndigoColor];
+
+	[self _setUpTableHeader];
 
 #ifndef LUISESTORE_LITE
 	fetchLatestLuiseStoreVersion(^(NSString* latestVersion)

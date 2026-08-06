@@ -111,57 +111,48 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 	self.tableView.allowsMultipleSelectionDuringEditing = NO;
 	self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
 	self.tableView.separatorInset = UIEdgeInsetsMake(0, 72, 0, 16);
-	self.tableView.backgroundColor = [UIColor systemGroupedBackgroundColor];
+	self.tableView.backgroundColor = [UIColor clearColor];
 
 	[self _setUpNavigationBar];
 	[self _setUpSearchBar];
-	[self _setUpTableHeader];
 }
 
-- (void)_setUpTableHeader
+- (UILabel*)registrationBadgeForState:(NSString*)state
 {
-	NSString* appId = NSBundle.mainBundle.bundleIdentifier;
-	UIImage* icon = [UIImage _applicationIconImageForBundleIdentifier:appId format:iconFormatToUse() scale:[UIScreen mainScreen].scale];
+	UILabel* badge = [[UILabel alloc] init];
+	badge.font = [UIFont systemFontOfSize:10 weight:UIFontWeightSemibold];
+	badge.textAlignment = NSTextAlignmentCenter;
 
-	UIView* header = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.tableView.bounds.size.width, 150)];
+	if([state isEqualToString:@"System"])
+	{
+		badge.text = @"SYSTEM";
+		badge.textColor = [UIColor systemGreenColor];
+		badge.backgroundColor = [[UIColor systemGreenColor] colorWithAlphaComponent:0.15];
+	}
+	else if([state isEqualToString:@"User"])
+	{
+		badge.text = @"USER";
+		badge.textColor = [UIColor systemOrangeColor];
+		badge.backgroundColor = [[UIColor systemOrangeColor] colorWithAlphaComponent:0.15];
+	}
+	else
+	{
+		badge.text = @"?";
+		badge.textColor = [UIColor systemGrayColor];
+		badge.backgroundColor = [[UIColor systemGrayColor] colorWithAlphaComponent:0.15];
+	}
 
-	UIImageView* iconView = [[UIImageView alloc] initWithImage:imageWithSize(icon, CGSizeMake(88, 88))];
-	iconView.layer.cornerRadius = 20;
-	iconView.layer.cornerCurve = kCACornerCurveContinuous;
-	iconView.layer.masksToBounds = YES;
-	iconView.layer.borderWidth = 1;
-	iconView.layer.borderColor = [UIColor.labelColor colorWithAlphaComponent:0.1].CGColor;
-	iconView.translatesAutoresizingMaskIntoConstraints = NO;
-	[header addSubview:iconView];
+	badge.layer.cornerRadius = 4;
+	badge.layer.cornerCurve = kCACornerCurveContinuous;
+	badge.layer.masksToBounds = YES;
 
-	UILabel* titleLabel = [[UILabel alloc] init];
-	titleLabel.text = APP_NAME;
-	titleLabel.font = [UIFont systemFontOfSize:24 weight:UIFontWeightBold];
-	titleLabel.textAlignment = NSTextAlignmentCenter;
-	titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
-	[header addSubview:titleLabel];
+	[badge sizeToFit];
+	CGRect badgeFrame = badge.frame;
+	badgeFrame.size.width += 12;
+	badgeFrame.size.height = 18;
+	badge.frame = badgeFrame;
 
-	UILabel* subtitleLabel = [[UILabel alloc] init];
-	NSString* version = [NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"] ?: @"";
-	subtitleLabel.text = [NSString stringWithFormat:@"Version %@", version];
-	subtitleLabel.font = [UIFont systemFontOfSize:13];
-	subtitleLabel.textColor = [UIColor secondaryLabelColor];
-	subtitleLabel.textAlignment = NSTextAlignmentCenter;
-	subtitleLabel.translatesAutoresizingMaskIntoConstraints = NO;
-	[header addSubview:subtitleLabel];
-
-	[NSLayoutConstraint activateConstraints:@[
-		[iconView.centerXAnchor constraintEqualToAnchor:header.centerXAnchor],
-		[iconView.topAnchor constraintEqualToAnchor:header.topAnchor constant:12],
-		[iconView.widthAnchor constraintEqualToConstant:88],
-		[iconView.heightAnchor constraintEqualToConstant:88],
-		[titleLabel.centerXAnchor constraintEqualToAnchor:header.centerXAnchor],
-		[titleLabel.topAnchor constraintEqualToAnchor:iconView.bottomAnchor constant:10],
-		[subtitleLabel.centerXAnchor constraintEqualToAnchor:header.centerXAnchor],
-		[subtitleLabel.topAnchor constraintEqualToAnchor:titleLabel.bottomAnchor constant:2],
-	]];
-
-	self.tableView.tableHeaderView = header;
+	return badge;
 }
 
 - (void)_setUpNavigationBar
@@ -475,8 +466,9 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 	cell.imageView.layer.cornerRadius = 13.5;
 	cell.imageView.layer.masksToBounds = YES;
 	cell.imageView.layer.cornerCurve = kCACornerCurveContinuous;
-	cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+	cell.accessoryView = [self registrationBadgeForState:[appInfo registrationState]];
 	cell.selectionStyle = UITableViewCellSelectionStyleDefault;
+	cell.backgroundColor = [UIColor clearColor];
 
 	if(appId)
 	{
