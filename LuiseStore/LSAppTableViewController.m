@@ -135,11 +135,12 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 	[self.view addSubview:self.floatingNavBar];
 
 	// Nav bar floats just below the status bar/notch — auto-calculated from
-	// the safe area. Height is intrinsic: the pill hugs its content.
+	// the safe area, so the gap stays small on any device.
 	[NSLayoutConstraint activateConstraints:@[
 		[self.floatingNavBar.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor constant:4],
 		[self.floatingNavBar.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor constant:12],
 		[self.floatingNavBar.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor constant:-12],
+		[self.floatingNavBar.heightAnchor constraintEqualToConstant:40],
 	]];
 
 	// Build the install menu (same as before) and attach as right button.

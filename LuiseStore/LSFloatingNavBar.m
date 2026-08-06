@@ -55,23 +55,24 @@
 		[self.contentContainer addSubview:self.rightStack];
 
 		[NSLayoutConstraint activateConstraints:@[
-			// Pill hugs its content: 10pt horizontal, 2pt vertical padding.
-			[self.blurView.centerXAnchor constraintEqualToAnchor:self.centerXAnchor],
-			[self.blurView.centerYAnchor constraintEqualToAnchor:self.centerYAnchor constant:2],
-			[self.blurView.leadingAnchor constraintGreaterThanOrEqualToAnchor:self.leadingAnchor],
-			[self.blurView.trailingAnchor constraintLessThanOrEqualToAnchor:self.trailingAnchor],
+			// Pill spans the bar width; height hugs content with 2pt vertical padding.
+			[self.blurView.topAnchor constraintEqualToAnchor:self.topAnchor],
+			[self.blurView.bottomAnchor constraintEqualToAnchor:self.bottomAnchor],
+			[self.blurView.leadingAnchor constraintEqualToAnchor:self.leadingAnchor],
+			[self.blurView.trailingAnchor constraintEqualToAnchor:self.trailingAnchor],
 
 			[self.contentContainer.topAnchor constraintEqualToAnchor:self.blurView.contentView.topAnchor constant:2],
 			[self.contentContainer.bottomAnchor constraintEqualToAnchor:self.blurView.contentView.bottomAnchor constant:-2],
 			[self.contentContainer.leadingAnchor constraintEqualToAnchor:self.blurView.contentView.leadingAnchor constant:10],
 			[self.contentContainer.trailingAnchor constraintEqualToAnchor:self.blurView.contentView.trailingAnchor constant:-10],
 
-			// Title sits 3pt below the pill's vertical center -> "nổi" (lifted) look.
+			// Title sits 3pt below center -> "nổi" (lifted) look.
 			[self.titleLabel.centerYAnchor constraintEqualToAnchor:self.contentContainer.centerYAnchor constant:3],
-			[self.titleLabel.centerXAnchor constraintEqualToAnchor:self.contentContainer.centerXAnchor],
+			[self.titleLabel.leadingAnchor constraintEqualToAnchor:self.contentContainer.leadingAnchor],
+			[self.titleLabel.widthAnchor constraintLessThanOrEqualToAnchor:self.contentContainer.widthAnchor multiplier:0.6],
 
 			[self.leftStack.centerYAnchor constraintEqualToAnchor:self.titleLabel.centerYAnchor],
-			[self.leftStack.leadingAnchor constraintEqualToAnchor:self.contentContainer.leadingAnchor],
+			[self.leftStack.leadingAnchor constraintEqualToAnchor:self.titleLabel.trailingAnchor constant:8],
 
 			[self.rightStack.centerYAnchor constraintEqualToAnchor:self.titleLabel.centerYAnchor],
 			[self.rightStack.trailingAnchor constraintEqualToAnchor:self.contentContainer.trailingAnchor],
