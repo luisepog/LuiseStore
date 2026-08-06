@@ -134,12 +134,13 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 	self.floatingNavBar.tintColor = LSTheme.accentColor;
 	[self.view addSubview:self.floatingNavBar];
 
-	// Lift the nav bar 3pt below the top safe area -> "nổi" (floating) look.
+	// Nav bar floats just below the status bar/notch — auto-calculated from
+	// the safe area, so the gap stays small on any device.
 	[NSLayoutConstraint activateConstraints:@[
-		[self.floatingNavBar.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor constant:3],
+		[self.floatingNavBar.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor constant:4],
 		[self.floatingNavBar.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor constant:12],
 		[self.floatingNavBar.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor constant:-12],
-		[self.floatingNavBar.heightAnchor constraintEqualToConstant:44],
+		[self.floatingNavBar.heightAnchor constraintEqualToConstant:40],
 	]];
 
 	// Build the install menu (same as before) and attach as right button.
