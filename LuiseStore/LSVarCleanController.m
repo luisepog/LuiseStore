@@ -24,6 +24,7 @@
     self.navigationController.navigationBar.hidden = NO;
     self.tableView.tableFooterView = [[UIView alloc] init];
     self.clearsSelectionOnViewWillAppear = NO;
+    self.tableView.backgroundColor = [UIColor systemGroupedBackgroundColor];
 
     [self setTitle:@"varClean"];
 
@@ -396,6 +397,7 @@ static NSArray *GetDirectoryContents(NSString *path) {
 - (void)tableView:(UITableView *)tableView willDisplayHeaderView:(UIView *)view forSection:(NSInteger)section {
     NSDictionary *groupData = self.tableData[section];
     UITableViewHeaderFooterView *header = (UITableViewHeaderFooterView *)view;
+    header.textLabel.font = [UIFont systemFontOfSize:13 weight:UIFontWeightMedium];
 
     if ([groupData[@"error"] boolValue]) {
         header.textLabel.textColor = UIColor.systemRedColor;

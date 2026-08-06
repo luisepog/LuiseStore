@@ -110,6 +110,8 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 	
 	self.tableView.allowsMultipleSelectionDuringEditing = NO;
 	self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
+	self.tableView.separatorInset = UIEdgeInsetsMake(0, 72, 0, 16);
+	self.tableView.backgroundColor = [UIColor systemGroupedBackgroundColor];
 
 	[self _setUpNavigationBar];
 	[self _setUpSearchBar];
@@ -351,6 +353,52 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 	return _cachedAppInfos.count;
 }
 
+- (UIView*)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section
+{
+	if(_cachedAppInfos.count > 0) return nil;
+
+	UIView* emptyView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, tableView.bounds.size.width, 200)];
+
+	UIImageView* iconView = [[UIImageView alloc] initWithImage:[UIImage systemImageNamed:@"square.stack.3d.up.slash"]];
+	iconView.tintColor = [UIColor systemGray3Color];
+	iconView.translatesAutoresizingMaskIntoConstraints = NO;
+	[emptyView addSubview:iconView];
+
+	UILabel* titleLabel = [[UILabel alloc] init];
+	titleLabel.text = @"No Apps Installed";
+	titleLabel.font = [UIFont systemFontOfSize:17 weight:UIFontWeightSemibold];
+	titleLabel.textColor = [UIColor labelColor];
+	titleLabel.textAlignment = NSTextAlignmentCenter;
+	titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
+	[emptyView addSubview:titleLabel];
+
+	UILabel* subtitleLabel = [[UILabel alloc] init];
+	subtitleLabel.text = @"Tap + to install an IPA file";
+	subtitleLabel.font = [UIFont systemFontOfSize:13];
+	subtitleLabel.textColor = [UIColor secondaryLabelColor];
+	subtitleLabel.textAlignment = NSTextAlignmentCenter;
+	subtitleLabel.translatesAutoresizingMaskIntoConstraints = NO;
+	[emptyView addSubview:subtitleLabel];
+
+	[NSLayoutConstraint activateConstraints:@[
+		[iconView.centerXAnchor constraintEqualToAnchor:emptyView.centerXAnchor],
+		[iconView.topAnchor constraintEqualToAnchor:emptyView.topAnchor constant:20],
+		[iconView.widthAnchor constraintEqualToConstant:48],
+		[iconView.heightAnchor constraintEqualToConstant:48],
+		[titleLabel.centerXAnchor constraintEqualToAnchor:emptyView.centerXAnchor],
+		[titleLabel.topAnchor constraintEqualToAnchor:iconView.bottomAnchor constant:12],
+		[subtitleLabel.centerXAnchor constraintEqualToAnchor:emptyView.centerXAnchor],
+		[subtitleLabel.topAnchor constraintEqualToAnchor:titleLabel.bottomAnchor constant:4],
+	]];
+
+	return emptyView;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section
+{
+	return _cachedAppInfos.count > 0 ? 0 : 200;
+}
+
 - (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection
 {
 	[self reloadTable];
@@ -371,12 +419,17 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 
 	// Configure the cell...
 	cell.textLabel.text = [appInfo displayName];
+	cell.textLabel.font = [UIFont systemFontOfSize:16 weight:UIFontWeightSemibold];
 	cell.detailTextLabel.text = [NSString stringWithFormat:@"%@ • %@", appVersion, appId];
+	cell.detailTextLabel.font = [UIFont systemFontOfSize:12];
+	cell.detailTextLabel.textColor = [UIColor secondaryLabelColor];
 	cell.imageView.layer.borderWidth = 1;
 	cell.imageView.layer.borderColor = [UIColor.labelColor colorWithAlphaComponent:0.1].CGColor;
 	cell.imageView.layer.cornerRadius = 13.5;
 	cell.imageView.layer.masksToBounds = YES;
 	cell.imageView.layer.cornerCurve = kCACornerCurveContinuous;
+	cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+	cell.selectionStyle = UITableViewCellSelectionStyleDefault;
 
 	if(appId)
 	{
@@ -410,7 +463,7 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 	}
 
 	cell.preservesSuperviewLayoutMargins = NO;
-	cell.separatorInset = UIEdgeInsetsZero;
+	cell.separatorInset = UIEdgeInsetsMake(0, 72, 0, 16);
 	cell.layoutMargins = UIEdgeInsetsZero;
 
 	return cell;

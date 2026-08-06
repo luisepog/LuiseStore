@@ -20,6 +20,10 @@ extern NSUserDefaults* luiseStoreUserDefaults(void);
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadSpecifiers) name:UIApplicationWillEnterForegroundNotification object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadSpecifiers) name:@"LuiseStoreReloadSettingsNotification" object:nil];
 
+	// Modern grouped look: clear cell backgrounds are already the default
+	// on iOS 15+; just make sure the table blends with the grouped background.
+	self.view.tintColor = [UIColor systemBlueColor];
+
 #ifndef LUISESTORE_LITE
 	fetchLatestLuiseStoreVersion(^(NSString* latestVersion)
 	{
