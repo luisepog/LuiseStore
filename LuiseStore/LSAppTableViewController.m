@@ -114,7 +114,7 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 	
 	self.tableView.allowsMultipleSelectionDuringEditing = NO;
 	self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
-	self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+	self.tableView.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
 	self.tableView.backgroundColor = [UIColor systemGroupedBackgroundColor];
 
 	self.title = @"Apps";
@@ -468,11 +468,8 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 	NSString* appId = [appInfo bundleIdentifier];
 	NSString* appVersion = [appInfo versionString];
 
-	// Clean card background: solid fill + soft shadow.
-	UIView* cardBackground = [LSTheme cleanCardBackgroundWithCornerRadius:16];
-	cardBackground.frame = CGRectInset(cell.bounds, 12, 4);
-	cardBackground.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-	cell.backgroundView = cardBackground;
+	// Clean rows: separator lines, no card background.
+	cell.backgroundView = nil;
 
 	// Configure the cell...
 	cell.textLabel.text = [appInfo displayName];
@@ -523,7 +520,7 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 	}
 
 	cell.preservesSuperviewLayoutMargins = NO;
-	cell.separatorInset = UIEdgeInsetsZero;
+	cell.separatorInset = UIEdgeInsetsMake(0, 16, 0, 16);
 	cell.layoutMargins = UIEdgeInsetsZero;
 
 	return cell;
@@ -536,7 +533,7 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-	return 78.0f;
+	return 76.0f;
 }
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
