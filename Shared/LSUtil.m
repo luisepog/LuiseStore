@@ -316,7 +316,17 @@ void github_fetchLatestVersion(NSString* repo, void (^completionHandler)(NSStrin
 
 				if (!jsonError)
 				{
-					completionHandler(jsonResponse[@"tag_name"]);
+					NSString* tagName = jsonResponse[@"tag_name"];
+
+					// GitHub release tags are commonly prefixed with "v" (e.g. "v2.1.2"),
+					// while the app's CFBundleVersion has no prefix. Strip it so version
+					// comparisons with NSNumericSearch don't falsely report an update.
+					if([tagName hasPrefix:@"v"])
+					{
+						tagName = [tagName substringFromIndex:1];
+					}
+
+					completionHandler(tagName);
 				}
 			}
 		}
