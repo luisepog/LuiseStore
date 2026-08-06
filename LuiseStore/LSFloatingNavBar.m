@@ -19,7 +19,7 @@
 		self.backgroundColor = UIColor.clearColor;
 
 		self.titleLabel = [[UILabel alloc] init];
-		self.titleLabel.font = [UIFont systemFontOfSize:20 weight:UIFontWeightBold];
+		self.titleLabel.font = [UIFont systemFontOfSize:17 weight:UIFontWeightSemibold];
 		self.titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
 
 		self.leftStack = [[UIStackView alloc] init];
