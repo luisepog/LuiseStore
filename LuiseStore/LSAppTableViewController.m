@@ -139,7 +139,7 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 		[self.floatingNavBar.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor constant:3],
 		[self.floatingNavBar.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor constant:12],
 		[self.floatingNavBar.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor constant:-12],
-		[self.floatingNavBar.heightAnchor constraintEqualToConstant:52],
+		[self.floatingNavBar.heightAnchor constraintEqualToConstant:44],
 	]];
 
 	// Build the install menu (same as before) and attach as right button.
