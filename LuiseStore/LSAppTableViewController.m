@@ -4,6 +4,7 @@
 #import <LSPresentationDelegate.h>
 #import "LSInstallationController.h"
 #import "LSUtil.h"
+#import "LSTheme.h"
 @import UniformTypeIdentifiers;
 
 #define ICON_FORMAT_IPAD 8
@@ -455,19 +456,27 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 	NSString* appId = [appInfo bundleIdentifier];
 	NSString* appVersion = [appInfo versionString];
 
+	// Glass cell background
+	UIVisualEffectView* glassBackground = [LSTheme glassCellBackgroundWithCornerRadius:18];
+	glassBackground.frame = CGRectInset(cell.bounds, 8, 4);
+	glassBackground.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+	cell.backgroundView = glassBackground;
+
 	// Configure the cell...
 	cell.textLabel.text = [appInfo displayName];
 	cell.textLabel.font = [UIFont systemFontOfSize:16 weight:UIFontWeightSemibold];
+	cell.textLabel.backgroundColor = [UIColor clearColor];
 	cell.detailTextLabel.text = [NSString stringWithFormat:@"%@ • %@", appVersion, appId];
 	cell.detailTextLabel.font = [UIFont systemFontOfSize:12];
 	cell.detailTextLabel.textColor = [UIColor secondaryLabelColor];
+	cell.detailTextLabel.backgroundColor = [UIColor clearColor];
 	cell.imageView.layer.borderWidth = 1;
 	cell.imageView.layer.borderColor = [UIColor.labelColor colorWithAlphaComponent:0.1].CGColor;
 	cell.imageView.layer.cornerRadius = 13.5;
 	cell.imageView.layer.masksToBounds = YES;
 	cell.imageView.layer.cornerCurve = kCACornerCurveContinuous;
 	cell.accessoryView = [self registrationBadgeForState:[appInfo registrationState]];
-	cell.selectionStyle = UITableViewCellSelectionStyleDefault;
+	cell.selectionStyle = UITableViewCellSelectionStyleNone;
 	cell.backgroundColor = [UIColor clearColor];
 
 	if(appId)
@@ -504,13 +513,20 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 	cell.preservesSuperviewLayoutMargins = NO;
 	cell.separatorInset = UIEdgeInsetsMake(0, 72, 0, 16);
 	cell.layoutMargins = UIEdgeInsetsZero;
+	cell.separatorInset = UIEdgeInsetsZero;
+	cell.layoutMargins = UIEdgeInsetsZero;
 
 	return cell;
 }
 
+- (BOOL)tableView:(UITableView*)tableView shouldHighlightRowAtIndexPath:(NSIndexPath*)indexPath
+{
+	return YES;
+}
+
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-	return 80.0f;
+	return 84.0f;
 }
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath

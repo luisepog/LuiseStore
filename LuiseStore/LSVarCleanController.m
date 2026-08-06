@@ -2,6 +2,7 @@
 #import "ZFCheckbox.h"
 #import "NSJSONSerialization+Comments.h"
 #import <LSUtil.h>
+#import "LSTheme.h"
 
 @interface LSVarCleanController ()
 @property (nonatomic, retain) NSMutableArray *tableData;
@@ -416,11 +417,18 @@ static NSArray *GetDirectoryContents(NSString *path) {
         cell.separatorInset = UIEdgeInsetsMake(0, 16, 0, 16);
     }
 
+    UIVisualEffectView *glassBackground = [LSTheme glassCellBackgroundWithCornerRadius:14];
+    glassBackground.frame = CGRectInset(cell.bounds, 6, 3);
+    glassBackground.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    cell.backgroundView = glassBackground;
+
     NSDictionary *item = self.tableData[indexPath.section][@"items"][indexPath.row];
     cell.textLabel.text = item[@"name"];
     cell.textLabel.font = [UIFont systemFontOfSize:16 weight:UIFontWeightMedium];
     cell.textLabel.textColor = [item[@"ignored"] boolValue] ? UIColor.tertiaryLabelColor : UIColor.labelColor;
     cell.textLabel.lineBreakMode = NSLineBreakByTruncatingMiddle;
+    cell.textLabel.backgroundColor = [UIColor clearColor];
+    cell.detailTextLabel.backgroundColor = [UIColor clearColor];
 
     // folder vs file icon + size hint for files
     BOOL isFolder = [item[@"isFolder"] boolValue];
@@ -437,6 +445,7 @@ static NSArray *GetDirectoryContents(NSString *path) {
     }
     cell.detailTextLabel.font = [UIFont systemFontOfSize:12];
     cell.detailTextLabel.textColor = [UIColor secondaryLabelColor];
+    cell.backgroundColor = [UIColor clearColor];
 
     ZFCheckbox *checkbox = [[ZFCheckbox alloc] initWithFrame:CGRectMake(0, 0, 20, 20)];
     checkbox.userInteractionEnabled = NO;

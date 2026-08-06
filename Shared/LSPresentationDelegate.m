@@ -1,4 +1,5 @@
 #import "LSPresentationDelegate.h"
+#import "LSTheme.h"
 
 @implementation LSPresentationDelegate
 
@@ -50,7 +51,10 @@ static UIAlertController* g_activityController;
 			[self.activityController addAction:cancelAction];
 		}
 
-		[self presentViewController:self.activityController animated:YES completion:nil];
+		[self presentViewController:self.activityController animated:YES completion:^
+		{
+			[LSTheme applyGlassToAlert:self.activityController];
+		}];
 	}
 }
 
@@ -72,7 +76,22 @@ static UIAlertController* g_activityController;
 
 + (void)presentViewController:(UIViewController *)viewControllerToPresent animated:(BOOL)flag completion:(void (^)(void))completionBlock
 {
-	[self.presentationViewController presentViewController:viewControllerToPresent animated:flag completion:completionBlock];
+	if([viewControllerToPresent isKindOfClass:UIAlertController.class])
+	{
+		UIViewController* target = self.presentationViewController;
+		if(!target) return;
+
+		[target presentViewController:viewControllerToPresent animated:flag completion:^
+		{
+			// Apply glass to the alert after it's on screen, then run the caller's completion.
+			[LSTheme applyGlassToAlert:viewControllerToPresent];
+			if(completionBlock) completionBlock();
+		}];
+	}
+	else
+	{
+		[self.presentationViewController presentViewController:viewControllerToPresent animated:flag completion:completionBlock];
+	}
 }
 
 @end
