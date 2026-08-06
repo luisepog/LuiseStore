@@ -228,9 +228,9 @@ jobs:
             # Fallback: Extract version from Info.plist
             PLIST_PATH="LuiseStore/Resources/Info.plist"
             if [ -f "$PLIST_PATH" ]; then
-              VERSION=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST_PATH" 2>/dev/null || echo "")
+              VERSION=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$PLIST_PATH" 2>/dev/null || echo "")
               if [ -z "$VERSION" ]; then
-                VERSION=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$PLIST_PATH" 2>/dev/null || echo "unknown")
+                VERSION=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST_PATH" 2>/dev/null || echo "unknown")
               fi
               echo "Version extracted from Info.plist: $VERSION"
             else
