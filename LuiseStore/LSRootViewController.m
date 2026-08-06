@@ -4,6 +4,11 @@
 #import "LSSettingsListController.h"
 #import <LSPresentationDelegate.h>
 #import "LSTheme.h"
+#import "LSFloatingTabBar.h"
+
+@interface LSRootViewController ()
+@property (nonatomic, retain) LSFloatingTabBar* floatingBar;
+@end
 
 @implementation LSRootViewController
 
@@ -38,14 +43,49 @@
 	LSPresentationDelegate.presentationViewController = self;
 
 	UIColor* accent = LSTheme.accentColor;
-
-	// Clean bars: system default appearance, just set tint.
-	[UITabBar appearance].tintColor = accent;
 	[UINavigationBar appearance].tintColor = accent;
 
-	// Grouped table background — clean, modern, auto dark mode.
 	[UITableView appearance].backgroundColor = [UIColor systemGroupedBackgroundColor];
 	[UITableViewCell appearance].backgroundColor = [UIColor clearColor];
+
+	// Hide the system tab bar; we replace it with a floating glass bar.
+	self.tabBar.hidden = YES;
+	// Reserve space at the bottom so content doesn't slide under the floating bar.
+	self.additionalSafeAreaInsets = UIEdgeInsetsMake(0, 0, 76, 0);
+
+	[self setupFloatingTabBar];
+}
+
+- (void)setupFloatingTabBar
+{
+	self.floatingBar = [[LSFloatingTabBar alloc] initWithFrame:CGRectZero];
+	self.floatingBar.translatesAutoresizingMaskIntoConstraints = NO;
+	[self.view addSubview:self.floatingBar];
+
+	// Lift the bar 3pt above the bottom safe area -> "nổi" (floating) look.
+	[NSLayoutConstraint activateConstraints:@[
+		[self.floatingBar.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor constant:12],
+		[self.floatingBar.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor constant:-12],
+		[self.floatingBar.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor constant:-3],
+		[self.floatingBar.heightAnchor constraintEqualToConstant:56],
+	]];
+
+	[self.floatingBar configureWithItems:@[
+		@{@"image": @"square.stack.3d.up.fill"},
+		@{@"image": @"trash"},
+		@{@"image": @"gear"},
+	]];
+
+	__weak typeof(self) weakSelf = self;
+	self.floatingBar.onSelect = ^(NSUInteger idx) {
+		weakSelf.selectedIndex = idx;
+	};
+}
+
+- (void)setSelectedIndex:(NSUInteger)selectedIndex
+{
+	[super setSelectedIndex:selectedIndex];
+	self.floatingBar.selectedIndex = selectedIndex;
 }
 
 @end

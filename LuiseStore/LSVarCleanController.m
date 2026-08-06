@@ -30,17 +30,47 @@
 
     [self setTitle:@"varClean"];
 
-    UIBarButtonItem *cleanButton = [[UIBarButtonItem alloc] initWithTitle:@"Clean"
-                                                                    style:UIBarButtonItemStylePlain
-                                                                   target:self
-                                                                   action:@selector(varClean)];
-    self.navigationItem.rightBarButtonItem = cleanButton;
+    // Select All as a circular icon button (checkmark.seal.fill).
+    UIImage *selectAllImage = [UIImage systemImageNamed:@"checkmark.seal.fill"];
+    UIButton *selectAllButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [selectAllButton setImage:selectAllImage forState:UIControlStateNormal];
+    selectAllButton.tintColor = LSTheme.accentColor;
+    selectAllButton.layer.cornerRadius = 18;
+    selectAllButton.layer.cornerCurve = kCACornerCurveContinuous;
+    selectAllButton.layer.masksToBounds = YES;
+    selectAllButton.backgroundColor = [UIColor.whiteColor colorWithAlphaComponent:0.14];
+    selectAllButton.layer.borderWidth = 1.0 / [UIScreen mainScreen].scale;
+    selectAllButton.layer.borderColor = [UIColor.whiteColor colorWithAlphaComponent:0.20].CGColor;
+    selectAllButton.translatesAutoresizingMaskIntoConstraints = NO;
+    [NSLayoutConstraint activateConstraints:@[
+        [selectAllButton.widthAnchor constraintEqualToConstant:36],
+        [selectAllButton.heightAnchor constraintEqualToConstant:36],
+    ]];
+    [selectAllButton addTarget:self action:@selector(batchSelect) forControlEvents:UIControlEventTouchUpInside];
+    selectAllButton.accessibilityLabel = @"Select All";
+    UIBarButtonItem *selectAllBarItem = [[UIBarButtonItem alloc] initWithCustomView:selectAllButton];
+    self.navigationItem.leftBarButtonItem = selectAllBarItem;
 
-    UIBarButtonItem *selectAllButton = [[UIBarButtonItem alloc] initWithTitle:@"Select All"
-                                                                        style:UIBarButtonItemStylePlain
-                                                                       target:self
-                                                                       action:@selector(batchSelect)];
-    self.navigationItem.leftBarButtonItem = selectAllButton;
+    // Clean as a circular icon button (trash.fill).
+    UIImage *cleanImage = [UIImage systemImageNamed:@"trash.fill"];
+    UIButton *cleanButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [cleanButton setImage:cleanImage forState:UIControlStateNormal];
+    cleanButton.tintColor = [UIColor systemRedColor];
+    cleanButton.layer.cornerRadius = 18;
+    cleanButton.layer.cornerCurve = kCACornerCurveContinuous;
+    cleanButton.layer.masksToBounds = YES;
+    cleanButton.backgroundColor = [UIColor.whiteColor colorWithAlphaComponent:0.14];
+    cleanButton.layer.borderWidth = 1.0 / [UIScreen mainScreen].scale;
+    cleanButton.layer.borderColor = [UIColor.whiteColor colorWithAlphaComponent:0.20].CGColor;
+    cleanButton.translatesAutoresizingMaskIntoConstraints = NO;
+    [NSLayoutConstraint activateConstraints:@[
+        [cleanButton.widthAnchor constraintEqualToConstant:36],
+        [cleanButton.heightAnchor constraintEqualToConstant:36],
+    ]];
+    [cleanButton addTarget:self action:@selector(varClean) forControlEvents:UIControlEventTouchUpInside];
+    cleanButton.accessibilityLabel = @"Clean";
+    UIBarButtonItem *cleanBarItem = [[UIBarButtonItem alloc] initWithCustomView:cleanButton];
+    self.navigationItem.rightBarButtonItem = cleanBarItem;
 
     UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
     refreshControl.tintColor = [UIColor grayColor];

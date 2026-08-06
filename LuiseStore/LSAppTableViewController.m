@@ -5,6 +5,7 @@
 #import "LSInstallationController.h"
 #import "LSUtil.h"
 #import "LSTheme.h"
+#import "LSFloatingNavBar.h"
 @import UniformTypeIdentifiers;
 
 #define ICON_FORMAT_IPAD 8
@@ -35,6 +36,11 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 
 @interface UIImage ()
 + (UIImage *)_applicationIconImageForBundleIdentifier:(NSString *)id format:(NSInteger)format scale:(double)scale;
+@end
+
+@interface LSAppTableViewController ()
+@property (nonatomic, retain) LSFloatingNavBar* floatingNavBar;
+@property (nonatomic, retain) UIView* searchContainer;
 @end
 
 @implementation LSAppTableViewController
@@ -114,8 +120,54 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 	self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
 	self.tableView.backgroundColor = [UIColor systemGroupedBackgroundColor];
 
+	// Hide system nav bar; we use a floating glass bar instead.
+	self.navigationController.navigationBar.hidden = YES;
+
+	[self _setUpFloatingNavBar];
+}
+
+- (void)_setUpFloatingNavBar
+{
+	self.floatingNavBar = [[LSFloatingNavBar alloc] init];
+	self.floatingNavBar.translatesAutoresizingMaskIntoConstraints = NO;
+	self.floatingNavBar.title = @"Apps";
+	self.floatingNavBar.tintColor = LSTheme.accentColor;
+	[self.view addSubview:self.floatingNavBar];
+
+	// Lift the nav bar 3pt below the top safe area -> "nổi" (floating) look.
+	[NSLayoutConstraint activateConstraints:@[
+		[self.floatingNavBar.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor constant:3],
+		[self.floatingNavBar.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor constant:12],
+		[self.floatingNavBar.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor constant:-12],
+		[self.floatingNavBar.heightAnchor constraintEqualToConstant:52],
+	]];
+
+	// Build the install menu (same as before) and attach as right button.
 	[self _setUpNavigationBar];
+
+	// Search bar in its own compact glass pill, just below the nav bar.
 	[self _setUpSearchBar];
+
+	[self updateTopInset];
+}
+
+- (void)viewDidLayoutSubviews
+{
+	[super viewDidLayoutSubviews];
+	[self updateTopInset];
+}
+
+- (void)updateTopInset
+{
+	[self.floatingNavBar layoutIfNeeded];
+	[self.searchContainer layoutIfNeeded];
+	CGFloat bottom = CGRectGetMaxY(self.searchContainer.frame);
+	CGFloat top = bottom - self.tableView.frame.origin.y;
+	if(top < 0) top = 0;
+	UIEdgeInsets insets = self.tableView.contentInset;
+	insets.top = top + 8;
+	self.tableView.contentInset = insets;
+	self.tableView.scrollIndicatorInsets = insets;
 }
 
 - (UILabel*)registrationBadgeForState:(NSString*)state
@@ -201,8 +253,8 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 	UIMenu* installMenu = [UIMenu menuWithChildren:@[installFromFileAction, installFromURLAction]];
 
 	UIBarButtonItem* installBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"plus"] menu:installMenu];
-	
-	self.navigationItem.rightBarButtonItems = @[installBarButtonItem];
+
+	self.floatingNavBar.rightButtons = @[installBarButtonItem];
 }
 
 - (void)_setUpSearchBar
@@ -210,8 +262,38 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 	_searchController = [[UISearchController alloc] initWithSearchResultsController:nil];
 	_searchController.searchResultsUpdater = self;
 	_searchController.obscuresBackgroundDuringPresentation = NO;
-	self.navigationItem.searchController = _searchController;
-	self.navigationItem.hidesSearchBarWhenScrolling = YES;
+
+	UISearchBar* searchBar = _searchController.searchBar;
+	searchBar.searchBarStyle = UISearchBarStyleMinimal;
+	searchBar.placeholder = @"Search";
+	searchBar.translatesAutoresizingMaskIntoConstraints = NO;
+
+	// Wrap the search bar in a compact glass pill.
+	UIBlurEffect* blur = [UIBlurEffect effectWithStyle:UIBlurEffectStyleSystemMaterial];
+	UIVisualEffectView* glass = [[UIVisualEffectView alloc] initWithEffect:blur];
+	glass.translatesAutoresizingMaskIntoConstraints = NO;
+	glass.layer.cornerRadius = 18;
+	glass.layer.cornerCurve = kCACornerCurveContinuous;
+	glass.layer.masksToBounds = YES;
+	glass.layer.borderWidth = 1.0 / [UIScreen mainScreen].scale;
+	glass.layer.borderColor = [UIColor.whiteColor colorWithAlphaComponent:0.18].CGColor;
+	[self.view addSubview:glass];
+
+	self.searchContainer = glass;
+
+	[glass.contentView addSubview:searchBar];
+
+	[NSLayoutConstraint activateConstraints:@[
+		[glass.topAnchor constraintEqualToAnchor:self.floatingNavBar.bottomAnchor constant:6],
+		[glass.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor constant:12],
+		[glass.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor constant:-12],
+		[glass.heightAnchor constraintEqualToConstant:36],
+
+		[searchBar.topAnchor constraintEqualToAnchor:glass.contentView.topAnchor],
+		[searchBar.bottomAnchor constraintEqualToAnchor:glass.contentView.bottomAnchor],
+		[searchBar.leadingAnchor constraintEqualToAnchor:glass.contentView.leadingAnchor],
+		[searchBar.trailingAnchor constraintEqualToAnchor:glass.contentView.trailingAnchor],
+	]];
 }
 
 - (void)updateSearchResultsForSearchController:(UISearchController *)searchController
