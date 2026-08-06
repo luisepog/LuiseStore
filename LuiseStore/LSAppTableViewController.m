@@ -471,7 +471,7 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 	cell.detailTextLabel.backgroundColor = [UIColor clearColor];
 	cell.imageView.layer.borderWidth = 0;
 	cell.imageView.layer.borderColor = nil;
-	cell.imageView.layer.cornerRadius = 14;
+	cell.imageView.layer.cornerRadius = 0;
 	cell.imageView.layer.masksToBounds = YES;
 	cell.imageView.layer.cornerCurve = kCACornerCurveContinuous;
 	cell.accessoryView = [self registrationBadgeForState:[appInfo registrationState]];

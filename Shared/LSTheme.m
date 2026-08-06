@@ -68,13 +68,13 @@
 	return glass;
 }
 
-// Clean card background: solid secondary system background with a soft shadow
-// and rounded corners. Reads cleanly in both light and dark mode.
+// Clean card background: solid secondary system background with a soft shadow.
+// No rounded corners — sharp edges, flat card style.
 + (UIView*)cleanCardBackgroundWithCornerRadius:(CGFloat)radius
 {
 	UIView* card = [[UIView alloc] init];
 	card.backgroundColor = [UIColor secondarySystemGroupedBackgroundColor];
-	card.layer.cornerRadius = radius;
+	card.layer.cornerRadius = 0;
 	card.layer.cornerCurve = kCACornerCurveContinuous;
 	card.layer.masksToBounds = NO;
 

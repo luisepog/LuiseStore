@@ -36,7 +36,7 @@ extern NSUserDefaults* luiseStoreUserDefaults(void);
 	UIView* header = [[UIView alloc] initWithFrame:CGRectMake(0, 0, table.bounds.size.width, 110)];
 
 	UIImageView* iconView = [[UIImageView alloc] initWithImage:icon];
-	iconView.layer.cornerRadius = 16;
+	iconView.layer.cornerRadius = 0;
 	iconView.layer.cornerCurve = kCACornerCurveContinuous;
 	iconView.layer.masksToBounds = YES;
 	iconView.layer.borderWidth = 1.0 / [UIScreen mainScreen].scale;
