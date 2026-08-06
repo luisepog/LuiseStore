@@ -66,8 +66,8 @@
 	[NSLayoutConstraint activateConstraints:@[
 		[self.floatingBar.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor constant:12],
 		[self.floatingBar.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor constant:-12],
-		[self.floatingBar.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor constant:-3],
-		[self.floatingBar.heightAnchor constraintEqualToConstant:44],
+		[self.floatingBar.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor constant:-8],
+		[self.floatingBar.heightAnchor constraintEqualToConstant:56],
 	]];
 
 	[self.floatingBar configureWithItems:@[
