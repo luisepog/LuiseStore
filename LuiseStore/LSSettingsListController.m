@@ -83,6 +83,12 @@ extern NSUserDefaults* luiseStoreUserDefaults(void);
 	// on iOS 15+; just make sure the table blends with the grouped background.
 	self.view.tintColor = [UIColor systemIndigoColor];
 
+	UITableView* table = [self valueForKey:@"_table"];
+	if(table)
+	{
+		table.showsVerticalScrollIndicator = NO;
+	}
+
 	[self _setUpTableHeader];
 
 #ifndef LUISESTORE_LITE
