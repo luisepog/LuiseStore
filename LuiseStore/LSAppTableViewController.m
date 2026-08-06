@@ -115,6 +115,53 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 
 	[self _setUpNavigationBar];
 	[self _setUpSearchBar];
+	[self _setUpTableHeader];
+}
+
+- (void)_setUpTableHeader
+{
+	NSString* appId = NSBundle.mainBundle.bundleIdentifier;
+	UIImage* icon = [UIImage _applicationIconImageForBundleIdentifier:appId format:iconFormatToUse() scale:[UIScreen mainScreen].scale];
+
+	UIView* header = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.tableView.bounds.size.width, 150)];
+
+	UIImageView* iconView = [[UIImageView alloc] initWithImage:imageWithSize(icon, CGSizeMake(88, 88))];
+	iconView.layer.cornerRadius = 20;
+	iconView.layer.cornerCurve = kCACornerCurveContinuous;
+	iconView.layer.masksToBounds = YES;
+	iconView.layer.borderWidth = 1;
+	iconView.layer.borderColor = [UIColor.labelColor colorWithAlphaComponent:0.1].CGColor;
+	iconView.translatesAutoresizingMaskIntoConstraints = NO;
+	[header addSubview:iconView];
+
+	UILabel* titleLabel = [[UILabel alloc] init];
+	titleLabel.text = APP_NAME;
+	titleLabel.font = [UIFont systemFontOfSize:24 weight:UIFontWeightBold];
+	titleLabel.textAlignment = NSTextAlignmentCenter;
+	titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
+	[header addSubview:titleLabel];
+
+	UILabel* subtitleLabel = [[UILabel alloc] init];
+	NSString* version = [NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"] ?: @"";
+	subtitleLabel.text = [NSString stringWithFormat:@"Version %@", version];
+	subtitleLabel.font = [UIFont systemFontOfSize:13];
+	subtitleLabel.textColor = [UIColor secondaryLabelColor];
+	subtitleLabel.textAlignment = NSTextAlignmentCenter;
+	subtitleLabel.translatesAutoresizingMaskIntoConstraints = NO;
+	[header addSubview:subtitleLabel];
+
+	[NSLayoutConstraint activateConstraints:@[
+		[iconView.centerXAnchor constraintEqualToAnchor:header.centerXAnchor],
+		[iconView.topAnchor constraintEqualToAnchor:header.topAnchor constant:12],
+		[iconView.widthAnchor constraintEqualToConstant:88],
+		[iconView.heightAnchor constraintEqualToConstant:88],
+		[titleLabel.centerXAnchor constraintEqualToAnchor:header.centerXAnchor],
+		[titleLabel.topAnchor constraintEqualToAnchor:iconView.bottomAnchor constant:10],
+		[subtitleLabel.centerXAnchor constraintEqualToAnchor:header.centerXAnchor],
+		[subtitleLabel.topAnchor constraintEqualToAnchor:titleLabel.bottomAnchor constant:2],
+	]];
+
+	self.tableView.tableHeaderView = header;
 }
 
 - (void)_setUpNavigationBar

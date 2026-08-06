@@ -409,13 +409,34 @@ static NSArray *GetDirectoryContents(NSString *path) {
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"Cell"];
+    static NSString *reuseID = @"Cell";
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:reuseID];
+    if (!cell) {
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:reuseID];
+        cell.separatorInset = UIEdgeInsetsMake(0, 16, 0, 16);
+    }
 
     NSDictionary *item = self.tableData[indexPath.section][@"items"][indexPath.row];
-    cell.textLabel.text = [NSString stringWithFormat:@"%@ %@",
-                           [item[@"isFolder"] boolValue] ? @"🗂️" : @"📄",
-                           item[@"name"]];
-    cell.textLabel.textColor = [item[@"ignored"] boolValue] ? UIColor.grayColor : UIColor.labelColor;
+    cell.textLabel.text = item[@"name"];
+    cell.textLabel.font = [UIFont systemFontOfSize:16 weight:UIFontWeightMedium];
+    cell.textLabel.textColor = [item[@"ignored"] boolValue] ? UIColor.tertiaryLabelColor : UIColor.labelColor;
+    cell.textLabel.lineBreakMode = NSLineBreakByTruncatingMiddle;
+
+    // folder vs file icon + size hint for files
+    BOOL isFolder = [item[@"isFolder"] boolValue];
+    if (isFolder) {
+        cell.imageView.image = [UIImage systemImageNamed:@"folder.fill"];
+        cell.imageView.tintColor = [UIColor systemBlueColor];
+        cell.detailTextLabel.text = @"Folder";
+    } else {
+        cell.imageView.image = [UIImage systemImageNamed:@"doc.fill"];
+        cell.imageView.tintColor = [UIColor systemGrayColor];
+        NSDictionary *attrs = [[NSFileManager defaultManager] attributesOfItemAtPath:item[@"path"] error:nil];
+        long long size = [attrs fileSize];
+        cell.detailTextLabel.text = [NSByteCountFormatter stringFromByteCount:size countStyle:NSByteCountFormatterCountStyleFile];
+    }
+    cell.detailTextLabel.font = [UIFont systemFontOfSize:12];
+    cell.detailTextLabel.textColor = [UIColor secondaryLabelColor];
 
     ZFCheckbox *checkbox = [[ZFCheckbox alloc] initWithFrame:CGRectMake(0, 0, 20, 20)];
     checkbox.userInteractionEnabled = NO;
