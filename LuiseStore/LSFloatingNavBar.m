@@ -8,7 +8,6 @@
 @property (nonatomic, retain) UIStackView* leftStack;
 @property (nonatomic, retain) UIStackView* rightStack;
 @property (nonatomic, retain) UIStackView* mainStack;
-@property (nonatomic, retain) UIView* contentContainer;
 @end
 
 @implementation LSFloatingNavBar
@@ -34,21 +33,16 @@
 		self.blurView.layer.shadowOffset = CGSizeMake(0, 4);
 		[self addSubview:self.blurView];
 
-		self.contentContainer = [[UIView alloc] init];
-		self.contentContainer.translatesAutoresizingMaskIntoConstraints = NO;
-		[self.blurView.contentView addSubview:self.contentContainer];
-
 		self.titleLabel = [[UILabel alloc] init];
 		self.titleLabel.font = [UIFont systemFontOfSize:20 weight:UIFontWeightBold];
 		self.titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
-		[self.contentContainer addSubview:self.titleLabel];
 
 		self.mainStack = [[UIStackView alloc] init];
 		self.mainStack.axis = UILayoutConstraintAxisHorizontal;
 		self.mainStack.alignment = UIStackViewAlignmentCenter;
 		self.mainStack.spacing = 10;
 		self.mainStack.translatesAutoresizingMaskIntoConstraints = NO;
-		[self.contentContainer addSubview:self.mainStack];
+		[self.blurView.contentView addSubview:self.mainStack];
 
 		self.leftStack = [[UIStackView alloc] init];
 		self.leftStack.axis = UILayoutConstraintAxisHorizontal;
@@ -72,14 +66,10 @@
 			[self.blurView.leadingAnchor constraintGreaterThanOrEqualToAnchor:self.leadingAnchor],
 			[self.blurView.trailingAnchor constraintLessThanOrEqualToAnchor:self.trailingAnchor],
 
-			[self.contentContainer.topAnchor constraintEqualToAnchor:self.blurView.contentView.topAnchor constant:3],
-			[self.contentContainer.bottomAnchor constraintEqualToAnchor:self.blurView.contentView.bottomAnchor constant:-3],
-			[self.contentContainer.leadingAnchor constraintEqualToAnchor:self.blurView.contentView.leadingAnchor constant:10],
-			[self.contentContainer.trailingAnchor constraintEqualToAnchor:self.blurView.contentView.trailingAnchor constant:-10],
-
-			// Title centered in the pill.
-			[self.mainStack.centerYAnchor constraintEqualToAnchor:self.contentContainer.centerYAnchor],
-			[self.mainStack.centerXAnchor constraintEqualToAnchor:self.contentContainer.centerXAnchor],
+			[self.mainStack.topAnchor constraintEqualToAnchor:self.blurView.contentView.topAnchor constant:3],
+			[self.mainStack.bottomAnchor constraintEqualToAnchor:self.blurView.contentView.bottomAnchor constant:-3],
+			[self.mainStack.leadingAnchor constraintEqualToAnchor:self.blurView.contentView.leadingAnchor constant:10],
+			[self.mainStack.trailingAnchor constraintEqualToAnchor:self.blurView.contentView.trailingAnchor constant:-10],
 		]];
 	}
 	return self;
