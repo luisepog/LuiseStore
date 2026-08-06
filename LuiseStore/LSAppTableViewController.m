@@ -214,7 +214,8 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 
 	UIBarButtonItem* searchBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"magnifyingglass"] style:UIBarButtonItemStylePlain target:self action:@selector(searchPressed:)];
 
-	self.navigationItem.rightBarButtonItems = @[installBarButtonItem, searchBarButtonItem];
+	self.navigationItem.leftBarButtonItem = searchBarButtonItem;
+	self.navigationItem.rightBarButtonItem = installBarButtonItem;
 }
 
 - (void)_setUpSearchBar
@@ -223,7 +224,7 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 	_searchController.searchResultsUpdater = self;
 	_searchController.obscuresBackgroundDuringPresentation = NO;
 	self.navigationItem.searchController = _searchController;
-	self.navigationItem.hidesSearchBarWhenScrolling = YES;
+	self.navigationItem.hidesSearchBarWhenScrolling = NO;
 }
 
 - (void)updateSearchResultsForSearchController:(UISearchController *)searchController
