@@ -968,7 +968,7 @@ extern UIImage* imageWithSize(UIImage* image, CGSize size);
 				{
 					if([serviceID isKindOfClass:NSString.class])
 					{
-						NSString* displayName = commonTCCServices[serviceID];
+						NSString* displayName = commonTCCServices()[serviceID];
 						if(displayName == nil)
 						{
 							[allowedTccServices addObject:[serviceID stringByReplacingOccurrencesOfString:@"kTCCService" withString:@""]];

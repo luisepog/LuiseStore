@@ -7,25 +7,33 @@
 
 #import <Foundation/Foundation.h>
 
-static NSDictionary* const commonTCCServices = @{
-    @"kTCCServicePhotos": @"Photo Library",
-    @"kTCCServicePhotosAdd": @"Photo Library (Add)",
-    @"kTCCServiceCamera": @"Camera",
-    @"kTCCServiceMicrophone": @"Microphone",
-    @"kTCCServiceAddressBook": @"Contacts",
-    @"kTCCServiceCalendar": @"Calendars",
-    @"kTCCServiceReminders": @"Reminders",
-    @"kTCCServiceWillow": @"HomeKit",
-    @"kTCCServiceGameCenterFriends": @"Game Center Friends",
-    @"kTCCServiceExposureNotification": @"Exposure Notifications",
-    @"kTCCServiceFocusStatus": @"Focus Status",
-    @"kTCCServiceUserTracking": @"User Tracking",
-    @"kTCCServiceFaceID": @"Face ID",
-    @"kTCCServiceMediaLibrary": @"Apple Media Library",
-    @"kTCCServiceMotion": @"Motion Sensors",
-    @"kTCCServiceNearbyInteraction": @"Nearby Device Interaction",
-    @"kTCCServiceBluetoothAlways": @"Bluetooth (Always)",
-    @"kTCCServiceBluetoothWhileInUse": @"Bluetooth (While In Use)",
-    @"kTCCServiceBluetoothPeripheral": @"Bluetooth (Peripherals)",
-    @"kTCCServiceLocation": @"Location"
-};
+static NSDictionary* commonTCCServices(void)
+{
+    static NSDictionary* dict = nil;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        dict = @{
+            @"kTCCServicePhotos": @"Photo Library",
+            @"kTCCServicePhotosAdd": @"Photo Library (Add)",
+            @"kTCCServiceCamera": @"Camera",
+            @"kTCCServiceMicrophone": @"Microphone",
+            @"kTCCServiceAddressBook": @"Contacts",
+            @"kTCCServiceCalendar": @"Calendars",
+            @"kTCCServiceReminders": @"Reminders",
+            @"kTCCServiceWillow": @"HomeKit",
+            @"kTCCServiceGameCenterFriends": @"Game Center Friends",
+            @"kTCCServiceExposureNotification": @"Exposure Notifications",
+            @"kTCCServiceFocusStatus": @"Focus Status",
+            @"kTCCServiceUserTracking": @"User Tracking",
+            @"kTCCServiceFaceID": @"Face ID",
+            @"kTCCServiceMediaLibrary": @"Apple Media Library",
+            @"kTCCServiceMotion": @"Motion Sensors",
+            @"kTCCServiceNearbyInteraction": @"Nearby Device Interaction",
+            @"kTCCServiceBluetoothAlways": @"Bluetooth (Always)",
+            @"kTCCServiceBluetoothWhileInUse": @"Bluetooth (While In Use)",
+            @"kTCCServiceBluetoothPeripheral": @"Bluetooth (Peripherals)",
+            @"kTCCServiceLocation": @"Location"
+        };
+    });
+    return dict;
+}

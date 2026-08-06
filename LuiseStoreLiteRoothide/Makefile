@@ -12,7 +12,7 @@ APPLICATION_NAME = LuiseStoreLite
 
 LuiseStoreLite_FILES = $(wildcard ../LuiseStore/*.m) $(wildcard ../Shared/*.m)
 LuiseStoreLite_RESOURCE_DIRS = ../LuiseStoreLite/Resources
-LuiseStoreLite_RESOURCE_FILES = Resources/luisestorehelper
+LuiseStoreLite_RESOURCE_FILES = Resources/luisestorehelper ../LuiseStore/Resources/VarCleanRules.json
 LuiseStoreLite_FRAMEWORKS = UIKit CoreGraphics CoreServices CoreTelephony
 LuiseStoreLite_PRIVATE_FRAMEWORKS = Preferences MobileIcons MobileContainerManager
 LuiseStoreLite_LIBRARIES = archive roothide
