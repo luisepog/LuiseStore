@@ -1270,17 +1270,19 @@ int uninstallApp(NSString* appPath, NSString* appId, BOOL useCustomMethod)
 
 #ifdef THEOS_PACKAGE_SCHEME_ROOTHIDE
 		// jbroot apps live in jbroot/Applications (shared dir): only remove the app bundle,
-		// never the parent directory. LSApplicationWorkspace uninstall would also work but
-		// the custom removal below is more predictable here.
+		// never the parent directory. Unregister first while the bundle still exists so
+		// LSApplicationWorkspace can resolve it and drop the icon; removing the bundle
+		// first would make unregisterApplication fail and leave a ghost icon.
 		if(appPath && [appPath.pathExtension isEqualToString:@"app"])
 		{
+			registerPath(appPath, YES, YES);
 			deleteSuc = [[NSFileManager defaultManager] removeItemAtPath:appPath error:nil];
 		}
 		else
 		{
 			deleteSuc = [[NSFileManager defaultManager] removeItemAtPath:[appPath stringByDeletingLastPathComponent] error:nil];
+			registerPath(appPath, YES, YES);
 		}
-		registerPath(appPath, YES, YES);
 #else
 		BOOL systemMethodSuccessful = NO;
 		if(!useCustomMethod)
