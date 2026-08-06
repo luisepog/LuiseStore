@@ -519,9 +519,8 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 		cell.imageView.image = _placeholderIcon;
 	}
 
-	cell.preservesSuperviewLayoutMargins = NO;
+	cell.preservesSuperviewLayoutMargins = YES;
 	cell.separatorInset = UIEdgeInsetsMake(0, 16, 0, 16);
-	cell.layoutMargins = UIEdgeInsetsZero;
 
 	return cell;
 }
