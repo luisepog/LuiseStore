@@ -16,39 +16,10 @@
 
 + (void)applyGlassToAlert:(UIViewController*)alertVC
 {
-	// Light glass for alerts: swap the alert's internal blur to a thin material
-	// so the background subtly shows through, and add a soft border.
-	__block UIVisualEffectView* glassContainer = nil;
-
-	__block void (^__weak weakWalk)(UIView*, BOOL);
-	__block void (^walk)(UIView*, BOOL);
-	walk = ^(UIView* view, BOOL isRoot) {
-		if([view isKindOfClass:UIVisualEffectView.class])
-		{
-			UIVisualEffectView* ev = (UIVisualEffectView*)view;
-			UIBlurEffect* glass = [UIBlurEffect effectWithStyle:UIBlurEffectStyleSystemThinMaterial];
-			if(isRoot)
-			{
-				glass = [UIBlurEffect effectWithStyle:UIBlurEffectStyleSystemMaterial];
-				glassContainer = ev;
-			}
-			ev.effect = glass;
-		}
-
-		for(UIView* sub in view.subviews)
-		{
-			weakWalk(sub, NO);
-		}
-	};
-	walk(alertVC.view, YES);
-
-	if(glassContainer)
-	{
-		glassContainer.layer.cornerRadius = 20;
-		glassContainer.layer.cornerCurve = kCACornerCurveContinuous;
-		glassContainer.layer.borderWidth = 1.0 / [UIScreen mainScreen].scale;
-		glassContainer.layer.borderColor = [UIColor.labelColor colorWithAlphaComponent:0.08].CGColor;
-	}
+	// Intentionally a no-op. Swapping the alert's internal UIVisualEffectView
+	// effect / layer styles here raced with dismissal transitions on iOS 15
+	// (SIGSEGV in -[UIPresentationController transitionDidFinish:] while
+	// enumerating the alert's subviews). Alerts keep the stock iOS look.
 }
 
 + (void)applyGlassToView:(UIView*)view cornerRadius:(CGFloat)radius
