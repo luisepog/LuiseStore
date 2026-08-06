@@ -63,10 +63,7 @@ static UIAlertController* g_activityController;
 			[self.activityController addAction:cancelAction];
 		}
 
-		[self presentViewController:self.activityController animated:YES completion:^
-		{
-			[LSTheme applyGlassToAlert:self.activityController];
-		}];
+		[self presentViewController:self.activityController animated:YES completion:nil];
 }
 
 + (void)startActivity:(NSString*)activity
@@ -111,12 +108,7 @@ static UIAlertController* g_activityController;
 		UIViewController* target = self.presentationViewController;
 		if(!target) return;
 
-		[target presentViewController:viewControllerToPresent animated:flag completion:^
-		{
-			// Apply glass to the alert after it's on screen, then run the caller's completion.
-			[LSTheme applyGlassToAlert:viewControllerToPresent];
-			if(completionBlock) completionBlock();
-		}];
+		[target presentViewController:viewControllerToPresent animated:flag completion:completionBlock];
 	}
 	else
 	{

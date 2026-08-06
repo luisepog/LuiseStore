@@ -14,31 +14,6 @@
 	return [[self accentColor] colorWithAlphaComponent:0.12];
 }
 
-+ (void)applyGlassToAlert:(UIViewController*)alertVC
-{
-	// Intentionally a no-op. Swapping the alert's internal UIVisualEffectView
-	// effect / layer styles here raced with dismissal transitions on iOS 15
-	// (SIGSEGV in -[UIPresentationController transitionDidFinish:] while
-	// enumerating the alert's subviews). Alerts keep the stock iOS look.
-}
-
-+ (void)applyGlassToView:(UIView*)view cornerRadius:(CGFloat)radius
-{
-	view.layer.cornerRadius = radius;
-	view.layer.cornerCurve = kCACornerCurveContinuous;
-	view.layer.masksToBounds = YES;
-}
-
-+ (UIVisualEffectView*)glassCellBackgroundWithCornerRadius:(CGFloat)radius
-{
-	// Kept for compatibility; not used in the clean theme.
-	UIVisualEffectView* glass = [[UIVisualEffectView alloc] initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleSystemThinMaterial]];
-	glass.layer.cornerRadius = radius;
-	glass.layer.cornerCurve = kCACornerCurveContinuous;
-	glass.layer.masksToBounds = YES;
-	return glass;
-}
-
 // Clean card background: solid secondary system background with a soft shadow.
 // No rounded corners — sharp edges, flat card style.
 + (UIView*)cleanCardBackgroundWithCornerRadius:(CGFloat)radius
