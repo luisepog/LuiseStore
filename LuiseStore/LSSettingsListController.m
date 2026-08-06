@@ -33,27 +33,27 @@ extern NSUserDefaults* luiseStoreUserDefaults(void);
 	}
 	if(!icon) return;
 
-	UIView* header = [[UIView alloc] initWithFrame:CGRectMake(0, 0, table.bounds.size.width, 130)];
+	UIView* header = [[UIView alloc] initWithFrame:CGRectMake(0, 0, table.bounds.size.width, 110)];
 
 	UIImageView* iconView = [[UIImageView alloc] initWithImage:icon];
-	iconView.layer.cornerRadius = 20;
+	iconView.layer.cornerRadius = 16;
 	iconView.layer.cornerCurve = kCACornerCurveContinuous;
 	iconView.layer.masksToBounds = YES;
-	iconView.layer.borderWidth = 1;
-	iconView.layer.borderColor = [UIColor.labelColor colorWithAlphaComponent:0.1].CGColor;
+	iconView.layer.borderWidth = 1.0 / [UIScreen mainScreen].scale;
+	iconView.layer.borderColor = [UIColor.labelColor colorWithAlphaComponent:0.08].CGColor;
 	iconView.translatesAutoresizingMaskIntoConstraints = NO;
 	[header addSubview:iconView];
 
 	UILabel* titleLabel = [[UILabel alloc] init];
 	titleLabel.text = APP_NAME;
-	titleLabel.font = [UIFont systemFontOfSize:24 weight:UIFontWeightBold];
+	titleLabel.font = [UIFont systemFontOfSize:20 weight:UIFontWeightBold];
 	titleLabel.textAlignment = NSTextAlignmentCenter;
 	titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
 	[header addSubview:titleLabel];
 
 	UILabel* subtitleLabel = [[UILabel alloc] init];
 	subtitleLabel.text = [NSString stringWithFormat:@"Version %@", [self getLuiseStoreVersion] ?: @""];
-	subtitleLabel.font = [UIFont systemFontOfSize:13];
+	subtitleLabel.font = [UIFont systemFontOfSize:12];
 	subtitleLabel.textColor = [UIColor secondaryLabelColor];
 	subtitleLabel.textAlignment = NSTextAlignmentCenter;
 	subtitleLabel.translatesAutoresizingMaskIntoConstraints = NO;
@@ -61,11 +61,11 @@ extern NSUserDefaults* luiseStoreUserDefaults(void);
 
 	[NSLayoutConstraint activateConstraints:@[
 		[iconView.centerXAnchor constraintEqualToAnchor:header.centerXAnchor],
-		[iconView.topAnchor constraintEqualToAnchor:header.topAnchor constant:12],
-		[iconView.widthAnchor constraintEqualToConstant:88],
-		[iconView.heightAnchor constraintEqualToConstant:88],
+		[iconView.topAnchor constraintEqualToAnchor:header.topAnchor constant:14],
+		[iconView.widthAnchor constraintEqualToConstant:64],
+		[iconView.heightAnchor constraintEqualToConstant:64],
 		[titleLabel.centerXAnchor constraintEqualToAnchor:header.centerXAnchor],
-		[titleLabel.topAnchor constraintEqualToAnchor:iconView.bottomAnchor constant:10],
+		[titleLabel.topAnchor constraintEqualToAnchor:iconView.bottomAnchor constant:8],
 		[subtitleLabel.centerXAnchor constraintEqualToAnchor:header.centerXAnchor],
 		[subtitleLabel.topAnchor constraintEqualToAnchor:titleLabel.bottomAnchor constant:2],
 	]];

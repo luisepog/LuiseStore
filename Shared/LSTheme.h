@@ -19,6 +19,9 @@ NS_ASSUME_NONNULL_BEGIN
 // Convenience: creates a frosted glass view for use as a table cell background.
 + (UIVisualEffectView*)glassCellBackgroundWithCornerRadius:(CGFloat)radius;
 
+// Clean card background: solid fill + soft shadow + rounded corners.
++ (UIView*)cleanCardBackgroundWithCornerRadius:(CGFloat)radius;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -5,29 +5,19 @@
 
 + (UIColor*)accentColor
 {
-	// Indigo, matching the background gradient.
-	return [UIColor colorWithRed:0.42 green:0.38 blue:0.95 alpha:1.0];
+	// Indigo accent — clean, modern.
+	return [UIColor systemIndigoColor];
 }
 
 + (UIColor*)accentColorDimmed
 {
-	return [[self accentColor] colorWithAlphaComponent:0.15];
-}
-
-static void LSApplyGlassAppearance(UIView* view, CGFloat cornerRadius)
-{
-	view.layer.cornerRadius = cornerRadius;
-	view.layer.cornerCurve = kCACornerCurveContinuous;
-	view.layer.masksToBounds = YES;
-	view.layer.borderWidth = 1.0 / [UIScreen mainScreen].scale;
-	view.layer.borderColor = [UIColor.whiteColor colorWithAlphaComponent:0.22].CGColor;
+	return [[self accentColor] colorWithAlphaComponent:0.12];
 }
 
 + (void)applyGlassToAlert:(UIViewController*)alertVC
 {
-	// Traverse the alert's internal hierarchy and swap every UIVisualEffectView
-	// (dimming backdrop, title vibrancy, button vibrancy) to a translucent
-	// material so the gradient shows through. Remove opaque fills as well.
+	// Light glass for alerts: swap the alert's internal blur to a thin material
+	// so the background subtly shows through, and add a soft border.
 	__block UIVisualEffectView* glassContainer = nil;
 
 	__block void (^__weak weakWalk)(UIView*, BOOL);
@@ -36,26 +26,13 @@ static void LSApplyGlassAppearance(UIView* view, CGFloat cornerRadius)
 		if([view isKindOfClass:UIVisualEffectView.class])
 		{
 			UIVisualEffectView* ev = (UIVisualEffectView*)view;
-			UIBlurEffect* glass = [UIBlurEffect effectWithStyle:UIBlurEffectStyleSystemMaterial];
+			UIBlurEffect* glass = [UIBlurEffect effectWithStyle:UIBlurEffectStyleSystemThinMaterial];
 			if(isRoot)
 			{
-				// Root container: keep a slightly stronger material.
-				glass = [UIBlurEffect effectWithStyle:UIBlurEffectStyleSystemThickMaterial];
+				glass = [UIBlurEffect effectWithStyle:UIBlurEffectStyleSystemMaterial];
 				glassContainer = ev;
 			}
 			ev.effect = glass;
-		}
-		else
-		{
-			// Remove opaque background fills (white/gray box behind buttons).
-			UIColor* bg = view.backgroundColor;
-			if(bg && !(CGColorGetAlpha(bg.CGColor) > 0.0) && !CGColorEqualToColor(bg.CGColor, UIColor.clearColor.CGColor))
-			{
-				if([bg isEqual:UIColor.whiteColor] || [bg isEqual:UIColor.secondarySystemBackgroundColor] || [bg isEqual:UIColor.systemBackgroundColor])
-				{
-					view.backgroundColor = UIColor.clearColor;
-				}
-			}
 		}
 
 		for(UIView* sub in view.subviews)
@@ -67,24 +44,49 @@ static void LSApplyGlassAppearance(UIView* view, CGFloat cornerRadius)
 
 	if(glassContainer)
 	{
-		// Glass border + specular highlight on the container.
-		glassContainer.layer.cornerRadius = 22;
+		glassContainer.layer.cornerRadius = 20;
 		glassContainer.layer.cornerCurve = kCACornerCurveContinuous;
 		glassContainer.layer.borderWidth = 1.0 / [UIScreen mainScreen].scale;
-		glassContainer.layer.borderColor = [UIColor.whiteColor colorWithAlphaComponent:0.25].CGColor;
+		glassContainer.layer.borderColor = [UIColor.labelColor colorWithAlphaComponent:0.08].CGColor;
 	}
 }
 
 + (void)applyGlassToView:(UIView*)view cornerRadius:(CGFloat)radius
 {
-	LSApplyGlassAppearance(view, radius);
+	view.layer.cornerRadius = radius;
+	view.layer.cornerCurve = kCACornerCurveContinuous;
+	view.layer.masksToBounds = YES;
 }
 
 + (UIVisualEffectView*)glassCellBackgroundWithCornerRadius:(CGFloat)radius
 {
-	UIVisualEffectView* glass = [[UIVisualEffectView alloc] initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleSystemMaterial]];
-	LSApplyGlassAppearance(glass, radius);
+	// Kept for compatibility; not used in the clean theme.
+	UIVisualEffectView* glass = [[UIVisualEffectView alloc] initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleSystemThinMaterial]];
+	glass.layer.cornerRadius = radius;
+	glass.layer.cornerCurve = kCACornerCurveContinuous;
+	glass.layer.masksToBounds = YES;
 	return glass;
+}
+
+// Clean card background: solid secondary system background with a soft shadow
+// and rounded corners. Reads cleanly in both light and dark mode.
++ (UIView*)cleanCardBackgroundWithCornerRadius:(CGFloat)radius
+{
+	UIView* card = [[UIView alloc] init];
+	card.backgroundColor = [UIColor secondarySystemGroupedBackgroundColor];
+	card.layer.cornerRadius = radius;
+	card.layer.cornerCurve = kCACornerCurveContinuous;
+	card.layer.masksToBounds = NO;
+
+	// Soft shadow for depth.
+	card.layer.shadowColor = [UIColor.blackColor CGColor];
+	card.layer.shadowOpacity = 0.06;
+	card.layer.shadowRadius = 8;
+	card.layer.shadowOffset = CGSizeMake(0, 2);
+	card.layer.shouldRasterize = YES;
+	card.layer.rasterizationScale = [UIScreen mainScreen].scale;
+
+	return card;
 }
 
 @end

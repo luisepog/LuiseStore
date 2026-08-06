@@ -25,7 +25,8 @@
     self.navigationController.navigationBar.hidden = NO;
     self.tableView.tableFooterView = [[UIView alloc] init];
     self.clearsSelectionOnViewWillAppear = NO;
-    self.tableView.backgroundColor = [UIColor clearColor];
+    self.tableView.backgroundColor = [UIColor systemGroupedBackgroundColor];
+    self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
 
     [self setTitle:@"varClean"];
 
@@ -417,10 +418,10 @@ static NSArray *GetDirectoryContents(NSString *path) {
         cell.separatorInset = UIEdgeInsetsMake(0, 16, 0, 16);
     }
 
-    UIVisualEffectView *glassBackground = [LSTheme glassCellBackgroundWithCornerRadius:14];
-    glassBackground.frame = CGRectInset(cell.bounds, 6, 3);
-    glassBackground.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    cell.backgroundView = glassBackground;
+    UIView *cardBackground = [LSTheme cleanCardBackgroundWithCornerRadius:12];
+    cardBackground.frame = CGRectInset(cell.bounds, 4, 2);
+    cardBackground.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    cell.backgroundView = cardBackground;
 
     NSDictionary *item = self.tableData[indexPath.section][@"items"][indexPath.row];
     cell.textLabel.text = item[@"name"];

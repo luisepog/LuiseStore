@@ -111,8 +111,8 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 	
 	self.tableView.allowsMultipleSelectionDuringEditing = NO;
 	self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
-	self.tableView.separatorInset = UIEdgeInsetsMake(0, 72, 0, 16);
-	self.tableView.backgroundColor = [UIColor clearColor];
+	self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+	self.tableView.backgroundColor = [UIColor systemGroupedBackgroundColor];
 
 	[self _setUpNavigationBar];
 	[self _setUpSearchBar];
@@ -121,36 +121,35 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 - (UILabel*)registrationBadgeForState:(NSString*)state
 {
 	UILabel* badge = [[UILabel alloc] init];
-	badge.font = [UIFont systemFontOfSize:10 weight:UIFontWeightSemibold];
+	badge.font = [UIFont systemFontOfSize:10 weight:UIFontWeightBold];
 	badge.textAlignment = NSTextAlignmentCenter;
-
-	if([state isEqualToString:@"System"])
-	{
-		badge.text = @"SYSTEM";
-		badge.textColor = [UIColor systemGreenColor];
-		badge.backgroundColor = [[UIColor systemGreenColor] colorWithAlphaComponent:0.15];
-	}
-	else if([state isEqualToString:@"User"])
-	{
-		badge.text = @"USER";
-		badge.textColor = [UIColor systemOrangeColor];
-		badge.backgroundColor = [[UIColor systemOrangeColor] colorWithAlphaComponent:0.15];
-	}
-	else
-	{
-		badge.text = @"?";
-		badge.textColor = [UIColor systemGrayColor];
-		badge.backgroundColor = [[UIColor systemGrayColor] colorWithAlphaComponent:0.15];
-	}
-
-	badge.layer.cornerRadius = 4;
+	badge.layer.cornerRadius = 6;
 	badge.layer.cornerCurve = kCACornerCurveContinuous;
 	badge.layer.masksToBounds = YES;
 
+	if([state isEqualToString:@"System"])
+	{
+		badge.text = @" SYSTEM ";
+		badge.textColor = [UIColor whiteColor];
+		badge.backgroundColor = [UIColor systemGreenColor];
+	}
+	else if([state isEqualToString:@"User"])
+	{
+		badge.text = @" USER ";
+		badge.textColor = [UIColor whiteColor];
+		badge.backgroundColor = [UIColor systemOrangeColor];
+	}
+	else
+	{
+		badge.text = @" ? ";
+		badge.textColor = [UIColor whiteColor];
+		badge.backgroundColor = [UIColor systemGrayColor];
+	}
+
 	[badge sizeToFit];
 	CGRect badgeFrame = badge.frame;
-	badgeFrame.size.width += 12;
-	badgeFrame.size.height = 18;
+	badgeFrame.size.width += 8;
+	badgeFrame.size.height = 20;
 	badge.frame = badgeFrame;
 
 	return badge;
@@ -456,23 +455,23 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 	NSString* appId = [appInfo bundleIdentifier];
 	NSString* appVersion = [appInfo versionString];
 
-	// Glass cell background
-	UIVisualEffectView* glassBackground = [LSTheme glassCellBackgroundWithCornerRadius:18];
-	glassBackground.frame = CGRectInset(cell.bounds, 8, 4);
-	glassBackground.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-	cell.backgroundView = glassBackground;
+	// Clean card background: solid fill + soft shadow.
+	UIView* cardBackground = [LSTheme cleanCardBackgroundWithCornerRadius:16];
+	cardBackground.frame = CGRectInset(cell.bounds, 6, 4);
+	cardBackground.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+	cell.backgroundView = cardBackground;
 
 	// Configure the cell...
 	cell.textLabel.text = [appInfo displayName];
-	cell.textLabel.font = [UIFont systemFontOfSize:16 weight:UIFontWeightSemibold];
+	cell.textLabel.font = [UIFont systemFontOfSize:17 weight:UIFontWeightSemibold];
 	cell.textLabel.backgroundColor = [UIColor clearColor];
 	cell.detailTextLabel.text = [NSString stringWithFormat:@"%@ • %@", appVersion, appId];
-	cell.detailTextLabel.font = [UIFont systemFontOfSize:12];
+	cell.detailTextLabel.font = [UIFont systemFontOfSize:13];
 	cell.detailTextLabel.textColor = [UIColor secondaryLabelColor];
 	cell.detailTextLabel.backgroundColor = [UIColor clearColor];
-	cell.imageView.layer.borderWidth = 1;
-	cell.imageView.layer.borderColor = [UIColor.labelColor colorWithAlphaComponent:0.1].CGColor;
-	cell.imageView.layer.cornerRadius = 13.5;
+	cell.imageView.layer.borderWidth = 0;
+	cell.imageView.layer.borderColor = nil;
+	cell.imageView.layer.cornerRadius = 14;
 	cell.imageView.layer.masksToBounds = YES;
 	cell.imageView.layer.cornerCurve = kCACornerCurveContinuous;
 	cell.accessoryView = [self registrationBadgeForState:[appInfo registrationState]];
@@ -511,8 +510,6 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 	}
 
 	cell.preservesSuperviewLayoutMargins = NO;
-	cell.separatorInset = UIEdgeInsetsMake(0, 72, 0, 16);
-	cell.layoutMargins = UIEdgeInsetsZero;
 	cell.separatorInset = UIEdgeInsetsZero;
 	cell.layoutMargins = UIEdgeInsetsZero;
 
@@ -526,7 +523,7 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-	return 84.0f;
+	return 76.0f;
 }
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
