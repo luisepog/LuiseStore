@@ -7,6 +7,7 @@
 @property (nonatomic, retain) UILabel* titleLabel;
 @property (nonatomic, retain) UIStackView* leftStack;
 @property (nonatomic, retain) UIStackView* rightStack;
+@property (nonatomic, retain) UIStackView* mainStack;
 @property (nonatomic, retain) UIView* contentContainer;
 @end
 
@@ -42,40 +43,43 @@
 		self.titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
 		[self.contentContainer addSubview:self.titleLabel];
 
+		self.mainStack = [[UIStackView alloc] init];
+		self.mainStack.axis = UILayoutConstraintAxisHorizontal;
+		self.mainStack.alignment = UIStackViewAlignmentCenter;
+		self.mainStack.spacing = 10;
+		self.mainStack.translatesAutoresizingMaskIntoConstraints = NO;
+		[self.contentContainer addSubview:self.mainStack];
+
 		self.leftStack = [[UIStackView alloc] init];
 		self.leftStack.axis = UILayoutConstraintAxisHorizontal;
 		self.leftStack.spacing = 8;
 		self.leftStack.translatesAutoresizingMaskIntoConstraints = NO;
-		[self.contentContainer addSubview:self.leftStack];
 
 		self.rightStack = [[UIStackView alloc] init];
 		self.rightStack.axis = UILayoutConstraintAxisHorizontal;
 		self.rightStack.spacing = 8;
 		self.rightStack.translatesAutoresizingMaskIntoConstraints = NO;
-		[self.contentContainer addSubview:self.rightStack];
+
+		[self.mainStack addArrangedSubview:self.leftStack];
+		[self.mainStack addArrangedSubview:self.titleLabel];
+		[self.mainStack addArrangedSubview:self.rightStack];
 
 		[NSLayoutConstraint activateConstraints:@[
-			// Pill spans the bar width; height hugs content with 2pt vertical padding.
-			[self.blurView.topAnchor constraintEqualToAnchor:self.topAnchor],
-			[self.blurView.bottomAnchor constraintEqualToAnchor:self.bottomAnchor],
-			[self.blurView.leadingAnchor constraintEqualToAnchor:self.leadingAnchor],
-			[self.blurView.trailingAnchor constraintEqualToAnchor:self.trailingAnchor],
+			// Pill centers on the bar and hugs its content:
+			// 10pt horizontal padding, 3pt vertical padding around the title.
+			[self.blurView.centerXAnchor constraintEqualToAnchor:self.centerXAnchor],
+			[self.blurView.centerYAnchor constraintEqualToAnchor:self.centerYAnchor],
+			[self.blurView.leadingAnchor constraintGreaterThanOrEqualToAnchor:self.leadingAnchor],
+			[self.blurView.trailingAnchor constraintLessThanOrEqualToAnchor:self.trailingAnchor],
 
-			[self.contentContainer.topAnchor constraintEqualToAnchor:self.blurView.contentView.topAnchor constant:2],
-			[self.contentContainer.bottomAnchor constraintEqualToAnchor:self.blurView.contentView.bottomAnchor constant:-2],
+			[self.contentContainer.topAnchor constraintEqualToAnchor:self.blurView.contentView.topAnchor constant:3],
+			[self.contentContainer.bottomAnchor constraintEqualToAnchor:self.blurView.contentView.bottomAnchor constant:-3],
 			[self.contentContainer.leadingAnchor constraintEqualToAnchor:self.blurView.contentView.leadingAnchor constant:10],
 			[self.contentContainer.trailingAnchor constraintEqualToAnchor:self.blurView.contentView.trailingAnchor constant:-10],
 
-			// Title sits 3pt below center -> "nổi" (lifted) look.
-			[self.titleLabel.centerYAnchor constraintEqualToAnchor:self.contentContainer.centerYAnchor constant:3],
-			[self.titleLabel.leadingAnchor constraintEqualToAnchor:self.contentContainer.leadingAnchor],
-			[self.titleLabel.widthAnchor constraintLessThanOrEqualToAnchor:self.contentContainer.widthAnchor multiplier:0.6],
-
-			[self.leftStack.centerYAnchor constraintEqualToAnchor:self.titleLabel.centerYAnchor],
-			[self.leftStack.leadingAnchor constraintEqualToAnchor:self.titleLabel.trailingAnchor constant:8],
-
-			[self.rightStack.centerYAnchor constraintEqualToAnchor:self.titleLabel.centerYAnchor],
-			[self.rightStack.trailingAnchor constraintEqualToAnchor:self.contentContainer.trailingAnchor],
+			// Title centered in the pill.
+			[self.mainStack.centerYAnchor constraintEqualToAnchor:self.contentContainer.centerYAnchor],
+			[self.mainStack.centerXAnchor constraintEqualToAnchor:self.contentContainer.centerXAnchor],
 		]];
 	}
 	return self;
