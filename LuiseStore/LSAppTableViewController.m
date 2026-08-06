@@ -470,7 +470,7 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 
 	// Clean card background: solid fill + soft shadow.
 	UIView* cardBackground = [LSTheme cleanCardBackgroundWithCornerRadius:16];
-	cardBackground.frame = CGRectInset(cell.bounds, 6, 4);
+	cardBackground.frame = CGRectInset(cell.bounds, 12, 4);
 	cardBackground.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 	cell.backgroundView = cardBackground;
 
