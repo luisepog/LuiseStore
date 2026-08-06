@@ -40,7 +40,6 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 
 @interface LSAppTableViewController ()
 @property (nonatomic, retain) LSFloatingNavBar* floatingNavBar;
-@property (nonatomic, retain) UIView* searchContainer;
 @end
 
 @implementation LSAppTableViewController
@@ -145,10 +144,16 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 	// Build the install menu (same as before) and attach as right button.
 	[self _setUpNavigationBar];
 
-	// Search bar in its own compact glass pill, just below the nav bar.
-	[self _setUpSearchBar];
+	// Search as a circular button on the left, level with the + button.
+	UIBarButtonItem* searchBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"magnifyingglass"] style:UIBarButtonItemStylePlain target:self action:@selector(searchPressed:)];
+	self.floatingNavBar.leftButtons = @[searchBarButtonItem];
 
 	[self updateTopInset];
+}
+
+- (void)searchPressed:(UIBarButtonItem*)item
+{
+	[self presentViewController:_searchController animated:YES completion:nil];
 }
 
 - (void)viewDidLayoutSubviews
@@ -160,8 +165,7 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 - (void)updateTopInset
 {
 	[self.floatingNavBar layoutIfNeeded];
-	[self.searchContainer layoutIfNeeded];
-	CGFloat bottom = CGRectGetMaxY(self.searchContainer.frame);
+	CGFloat bottom = CGRectGetMaxY(self.floatingNavBar.frame);
 	CGFloat top = bottom - self.tableView.frame.origin.y;
 	if(top < 0) top = 0;
 	UIEdgeInsets insets = self.tableView.contentInset;
@@ -262,38 +266,6 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 	_searchController = [[UISearchController alloc] initWithSearchResultsController:nil];
 	_searchController.searchResultsUpdater = self;
 	_searchController.obscuresBackgroundDuringPresentation = NO;
-
-	UISearchBar* searchBar = _searchController.searchBar;
-	searchBar.searchBarStyle = UISearchBarStyleMinimal;
-	searchBar.placeholder = @"Search";
-	searchBar.translatesAutoresizingMaskIntoConstraints = NO;
-
-	// Wrap the search bar in a compact glass pill.
-	UIBlurEffect* blur = [UIBlurEffect effectWithStyle:UIBlurEffectStyleSystemMaterial];
-	UIVisualEffectView* glass = [[UIVisualEffectView alloc] initWithEffect:blur];
-	glass.translatesAutoresizingMaskIntoConstraints = NO;
-	glass.layer.cornerRadius = 18;
-	glass.layer.cornerCurve = kCACornerCurveContinuous;
-	glass.layer.masksToBounds = YES;
-	glass.layer.borderWidth = 1.0 / [UIScreen mainScreen].scale;
-	glass.layer.borderColor = [UIColor.whiteColor colorWithAlphaComponent:0.18].CGColor;
-	[self.view addSubview:glass];
-
-	self.searchContainer = glass;
-
-	[glass.contentView addSubview:searchBar];
-
-	[NSLayoutConstraint activateConstraints:@[
-		[glass.topAnchor constraintEqualToAnchor:self.floatingNavBar.bottomAnchor constant:6],
-		[glass.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor constant:12],
-		[glass.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor constant:-12],
-		[glass.heightAnchor constraintEqualToConstant:36],
-
-		[searchBar.topAnchor constraintEqualToAnchor:glass.contentView.topAnchor],
-		[searchBar.bottomAnchor constraintEqualToAnchor:glass.contentView.bottomAnchor],
-		[searchBar.leadingAnchor constraintEqualToAnchor:glass.contentView.leadingAnchor],
-		[searchBar.trailingAnchor constraintEqualToAnchor:glass.contentView.trailingAnchor],
-	]];
 }
 
 - (void)updateSearchResultsForSearchController:(UISearchController *)searchController
