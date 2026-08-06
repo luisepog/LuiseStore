@@ -1,6 +1,7 @@
 #import "LSVarCleanController.h"
 #import "ZFCheckbox.h"
 #import "NSJSONSerialization+Comments.h"
+#import <LSUtil.h>
 
 @interface LSVarCleanController ()
 @property (nonatomic, retain) NSMutableArray *tableData;
@@ -297,28 +298,53 @@ static NSArray *GetDirectoryContents(NSString *path) {
 - (void)performClean {
     [self.tableView.refreshControl beginRefreshing];
 
-    for (NSDictionary *group in [self.tableData copy]) {
-        for (NSDictionary *item in [group[@"items"] copy]) {
-            if (![item[@"checked"] boolValue]) {
-                continue;
+    // Collect checked paths first, then remove via the root helper:
+    // this app runs as mobile, so files owned by root (e.g. /var/root,
+    // /var/db) would otherwise fail to delete.
+    NSMutableArray *pathsToDelete = [NSMutableArray new];
+    for (NSDictionary *group in self.tableData) {
+        for (NSDictionary *item in group[@"items"]) {
+            if ([item[@"checked"] boolValue]) {
+                [pathsToDelete addObject:item[@"path"]];
             }
-
-            NSError *error = nil;
-            if (![NSFileManager.defaultManager removeItemAtPath:item[@"path"] error:&error]) {
-                NSLog(@"clean failed: %@", error);
-                continue;
-            }
-
-            NSIndexPath *indexPath = [NSIndexPath indexPathForRow:[group[@"items"] indexOfObject:item]
-                                                        inSection:[self.tableData indexOfObject:group]];
-            [group[@"items"] removeObject:item];
-            [self.tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationLeft];
         }
     }
 
-    [self.tableView.refreshControl endRefreshing];
-    self.tableData = [self updateData:NO];
-    [self.tableView reloadData];
+    if (pathsToDelete.count) {
+        NSMutableArray *args = [NSMutableArray arrayWithObject:@"clean-paths"];
+        [args addObjectsFromArray:pathsToDelete];
+        NSString *stdOut = nil;
+        int ret = spawnRoot(rootHelperPath(), args, &stdOut, nil);
+        if (ret != 0) {
+            // stdOut contains the paths that failed to delete
+            for (NSString *failedPath in [stdOut componentsSeparatedByString:@"\n"]) {
+                if (failedPath.length == 0) continue;
+                NSLog(@"[varClean] failed to delete %@", failedPath);
+                for (NSDictionary *group in self.tableData) {
+                    for (NSMutableDictionary *item in group[@"items"]) {
+                        if ([item[@"path"] isEqualToString:failedPath]) {
+                            item[@"checked"] = @NO;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        [self.tableView.refreshControl endRefreshing];
+        self.tableData = [self updateData:NO];
+        [self.tableView reloadData];
+
+        if (ret != 0) {
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Some items could not be deleted"
+                                                                           message:@"The remaining items were unchecked. Check the console for details."
+                                                                    preferredStyle:UIAlertControllerStyleAlert];
+            [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
+            [self presentViewController:alert animated:YES completion:nil];
+        }
+    } else {
+        [self.tableView.refreshControl endRefreshing];
+    }
 }
 
 - (void)varClean {

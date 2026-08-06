@@ -1722,6 +1722,24 @@ int MAIN_NAME(int argc, char *argv[], char *envp[])
 			NSString* appPath = args.lastObject;
 			ret = uninstallAppByPath(appPath, useCustomMethod);
 		}
+		else if([cmd isEqualToString:@"clean-paths"])
+		{
+			// varClean: delete the given paths as root. Remaining paths are
+			// separated by newline in stdout so the app can report failures.
+			if(args.count < 2) return -3;
+			int failures = 0;
+			for(NSUInteger i = 1; i < args.count; i++)
+			{
+				NSString* path = args[i];
+				NSError* error = nil;
+				if(![[NSFileManager defaultManager] removeItemAtPath:path error:&error])
+				{
+					failures++;
+					printf("%s\n", path.UTF8String);
+				}
+			}
+			ret = failures > 0 ? 1 : 0;
+		}
 		else if([cmd isEqualToString:@"refresh"])
 		{
 			refreshAppRegistrations(!shouldRegisterAsUserByDefault());
