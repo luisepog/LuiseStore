@@ -398,22 +398,30 @@ NSArray* luiseStoreInstalledAppBundlePathsInternal(NSString *marker)
 			if([item.pathExtension isEqualToString:@"app"])
 			{
 				NSString* appPath = [containerPath stringByAppendingPathComponent:item];
-#ifdef THEOS_PACKAGE_SCHEME_ROOTHIDE
-				if([containerPath isEqualToString:jbroot(@"/Applications")])
-				{
-					// jbroot/Applications is shared with Sileo/Zebra apps; only count
-					// bundles that carry our per-app marker (see installApp).
-					NSString* appMarkerPath = [appPath stringByAppendingPathComponent:marker];
-					if(![[NSFileManager defaultManager] fileExistsAtPath:appMarkerPath])
-					{
-						continue;
-					}
-				}
-#endif
 				[appPaths addObject:appPath];
 			}
 		}
 	}
+
+#ifdef THEOS_PACKAGE_SCHEME_ROOTHIDE
+	// jbroot/Applications is shared with Sileo/Zebra apps; only count
+	// bundles that carry our per-app marker (see installApp).
+	NSString* jbApplicationsPath = jbroot(@"/Applications");
+	NSArray* jbItems = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:jbApplicationsPath error:nil];
+	for(NSString* item in jbItems)
+	{
+		if([item.pathExtension isEqualToString:@"app"])
+		{
+			NSString* appPath = [jbApplicationsPath stringByAppendingPathComponent:item];
+			NSString* appMarkerPath = [appPath stringByAppendingPathComponent:marker];
+			if([[NSFileManager defaultManager] fileExistsAtPath:appMarkerPath])
+			{
+				[appPaths addObject:appPath];
+			}
+		}
+	}
+#endif
+
 	return appPaths.copy;
 }
 

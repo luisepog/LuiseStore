@@ -84,7 +84,7 @@
 
 		lastGroupSpecifier = utilitiesGroupSpecifier;
 
-		if(isInstalled || luiseStoreInstalledAppContainerPaths().count)
+		if(isInstalled || luiseStoreInstalledAppContainerPaths().count || luiseStoreInstalledAppBundlePaths().count)
 		{
 			PSSpecifier* refreshAppRegistrationsSpecifier = [PSSpecifier preferenceSpecifierNamed:@"Refresh App Registrations"
 												target:self
