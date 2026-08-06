@@ -3,7 +3,6 @@
 #import <objc/message.h>
 
 @interface LSFloatingNavBar ()
-@property (nonatomic, retain) UIVisualEffectView* blurView;
 @property (nonatomic, retain) UILabel* titleLabel;
 @property (nonatomic, retain) UIStackView* leftStack;
 @property (nonatomic, retain) UIStackView* rightStack;
@@ -19,30 +18,9 @@
 	{
 		self.backgroundColor = UIColor.clearColor;
 
-		UIBlurEffect* blur = [UIBlurEffect effectWithStyle:UIBlurEffectStyleSystemMaterial];
-		self.blurView = [[UIVisualEffectView alloc] initWithEffect:blur];
-		self.blurView.translatesAutoresizingMaskIntoConstraints = NO;
-		self.blurView.layer.cornerRadius = 16;
-		self.blurView.layer.cornerCurve = kCACornerCurveContinuous;
-		self.blurView.layer.masksToBounds = YES;
-		self.blurView.layer.borderWidth = 1.0 / [UIScreen mainScreen].scale;
-		self.blurView.layer.borderColor = [UIColor.whiteColor colorWithAlphaComponent:0.22].CGColor;
-		self.blurView.layer.shadowColor = [UIColor.blackColor CGColor];
-		self.blurView.layer.shadowOpacity = 0.10;
-		self.blurView.layer.shadowRadius = 10;
-		self.blurView.layer.shadowOffset = CGSizeMake(0, 4);
-		[self addSubview:self.blurView];
-
 		self.titleLabel = [[UILabel alloc] init];
 		self.titleLabel.font = [UIFont systemFontOfSize:20 weight:UIFontWeightBold];
 		self.titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
-
-		self.mainStack = [[UIStackView alloc] init];
-		self.mainStack.axis = UILayoutConstraintAxisHorizontal;
-		self.mainStack.alignment = UIStackViewAlignmentCenter;
-		self.mainStack.spacing = 10;
-		self.mainStack.translatesAutoresizingMaskIntoConstraints = NO;
-		[self.blurView.contentView addSubview:self.mainStack];
 
 		self.leftStack = [[UIStackView alloc] init];
 		self.leftStack.axis = UILayoutConstraintAxisHorizontal;
@@ -54,22 +32,24 @@
 		self.rightStack.spacing = 8;
 		self.rightStack.translatesAutoresizingMaskIntoConstraints = NO;
 
+		self.mainStack = [[UIStackView alloc] init];
+		self.mainStack.axis = UILayoutConstraintAxisHorizontal;
+		self.mainStack.alignment = UIStackViewAlignmentCenter;
+		self.mainStack.spacing = 10;
+		self.mainStack.translatesAutoresizingMaskIntoConstraints = NO;
+		[self addSubview:self.mainStack];
+
 		[self.mainStack addArrangedSubview:self.leftStack];
 		[self.mainStack addArrangedSubview:self.titleLabel];
 		[self.mainStack addArrangedSubview:self.rightStack];
 
+		// Title sits on the app background (no pill), buttons keep their
+		// circular glass look.
 		[NSLayoutConstraint activateConstraints:@[
-			// Pill centers on the bar and hugs its content:
-			// 10pt horizontal padding, 3pt vertical padding around the title.
-			[self.blurView.centerXAnchor constraintEqualToAnchor:self.centerXAnchor],
-			[self.blurView.centerYAnchor constraintEqualToAnchor:self.centerYAnchor],
-			[self.blurView.leadingAnchor constraintGreaterThanOrEqualToAnchor:self.leadingAnchor],
-			[self.blurView.trailingAnchor constraintLessThanOrEqualToAnchor:self.trailingAnchor],
-
-			[self.mainStack.topAnchor constraintEqualToAnchor:self.blurView.contentView.topAnchor constant:3],
-			[self.mainStack.bottomAnchor constraintEqualToAnchor:self.blurView.contentView.bottomAnchor constant:-3],
-			[self.mainStack.leadingAnchor constraintEqualToAnchor:self.blurView.contentView.leadingAnchor constant:10],
-			[self.mainStack.trailingAnchor constraintEqualToAnchor:self.blurView.contentView.trailingAnchor constant:-10],
+			[self.mainStack.topAnchor constraintEqualToAnchor:self.topAnchor],
+			[self.mainStack.bottomAnchor constraintEqualToAnchor:self.bottomAnchor],
+			[self.mainStack.leadingAnchor constraintEqualToAnchor:self.leadingAnchor constant:4],
+			[self.mainStack.trailingAnchor constraintLessThanOrEqualToAnchor:self.trailingAnchor],
 		]];
 	}
 	return self;
