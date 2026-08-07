@@ -518,6 +518,18 @@ int signAdhoc(NSString *filePath, NSDictionary *entitlements)
 			NSLog(@"[signAdhoc] filePath=%@", filePath);
 			NSLog(@"[signAdhoc] filePath jbroot=%@", jbroot(filePath));
 			NSLog(@"[signAdhoc] filePath exists=%d jbroot exists=%d", [[NSFileManager defaultManager] fileExistsAtPath:filePath], [[NSFileManager defaultManager] fileExistsAtPath:jbroot(filePath)]);
+
+			// ldid is a standalone binary and does not see the roothide path
+			// translation. Only the roothide helper (LuiseStoreLiteRoothide)
+			// must hand it /rootfs-prefixed paths; the normal LuiseStore keeps
+			// the plain paths.
+#ifdef LUISESTORE_LITE
+			BOOL useRootfsPaths = YES;
+#else
+			BOOL useRootfsPaths = NO;
+#endif
+			NSLog(@"[signAdhoc] useRootfsPaths=%d", useRootfsPaths);
+
 			if(entitlements)
 			{
 				NSData *entitlementsXML = [NSPropertyListSerialization dataWithPropertyList:entitlements format:NSPropertyListXMLFormat_v1_0 options:0 error:nil];
@@ -525,15 +537,27 @@ int signAdhoc(NSString *filePath, NSDictionary *entitlements)
 					entitlementsPath = [[filePath stringByDeletingLastPathComponent] stringByAppendingPathComponent:[NSUUID UUID].UUIDString];
 					BOOL writeSuc = [entitlementsXML writeToFile:entitlementsPath atomically:NO];
 					NSLog(@"[signAdhoc] write entitlements %@ => %d (exists: %d)", entitlementsPath, writeSuc, [[NSFileManager defaultManager] fileExistsAtPath:entitlementsPath]);
-					NSString* entRootfs = [@"/rootfs" stringByAppendingString:entitlementsPath];
-					NSString* entJbroot = jbroot(entitlementsPath);
-					NSLog(@"[signAdhoc] entitlements rootfs-view=%@ exists=%d | jbroot-view=%@ exists=%d", entRootfs, [[NSFileManager defaultManager] fileExistsAtPath:entRootfs], entJbroot, [[NSFileManager defaultManager] fileExistsAtPath:entJbroot]);
-					signArg = [@"-S" stringByAppendingString:entRootfs];
+					if(useRootfsPaths)
+					{
+						NSString* entRootfs = [@"/rootfs" stringByAppendingString:entitlementsPath];
+						NSString* entJbroot = jbroot(entitlementsPath);
+						NSLog(@"[signAdhoc] entitlements rootfs-view=%@ exists=%d | jbroot-view=%@ exists=%d", entRootfs, [[NSFileManager defaultManager] fileExistsAtPath:entRootfs], entJbroot, [[NSFileManager defaultManager] fileExistsAtPath:entJbroot]);
+						signArg = [@"-S" stringByAppendingString:entRootfs];
+					}
+					else
+					{
+						signArg = [@"-S" stringByAppendingString:entitlementsPath];
+					}
 				}
 				
 			}
-			NSString* fileRootfs = [@"/rootfs" stringByAppendingString:filePath];
-			int ldidRet = runLdid(@[signArg, fileRootfs], nil, &errorOutput);
+
+#ifdef LUISESTORE_LITE
+			NSString* fileToSign = [@"/rootfs" stringByAppendingString:filePath];
+#else
+			NSString* fileToSign = filePath;
+#endif
+			int ldidRet = runLdid(@[signArg, fileToSign], nil, &errorOutput);
 			if (entitlementsPath) {
 				[[NSFileManager defaultManager] removeItemAtPath:entitlementsPath error:nil];
 			}
